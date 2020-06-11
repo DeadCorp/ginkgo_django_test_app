@@ -1,0 +1,47 @@
+{% extends 'base_generic.html' %}
+
+{% block title %} Add Task {% endblock %}
+
+{% block content %}
+    <form action="{% url 'task:add_task' %}" method="post" class="form-group">
+        {% csrf_token %}
+        <input type="hidden" name="user_id" value="{{ request.user.id }}">
+        <label for="sku">
+            <pre>Write products SKU, separate them with spaces</pre>
+            <pre>Format:</pre>
+            <pre><b>    On start need write Server code - 1 letters, and symbol '_' without quotes  like :</b> M_ </pre>
+            <pre><b>    next need write supplier code - 2 letters, and symbol '_' without quotes  like :</b> M_KM_ </pre>
+            <pre><b>    If product not have option need write just id after supplier code like :</b> M_KM_0000000000 <b>or</b> M_KM_0000000000#</pre>
+            <pre><b>    If product have option, need write option id after product id and symbol '#'  like :</b> M_KM_0000000000#1111111111 </pre>
+            <pre>    Also you can add letter after symbol '-' like : M_KM_0000000000#1111111111-A <b>or</b> M_KM_0000000000-A</pre>
+            <pre>    And you can add quantity after symbol '$' like : M_KM_0000000000#1111111111-A$10 <b>or</b> M_KM_0000000000$10</pre>
+        </label>
+        <textarea id="sku" style="width: 100%; height: 300px" class="form-control" name="data"></textarea>
+        <button style="margin: 10px" type="submit" class="btn btn-primary">Start search</button>
+    </form>
+    {% if tasks %}
+        <h3 style="text-align: center">Last tasks</h3>
+    {% endif %}
+    <div class="row">
+        {% for task in tasks %}
+        <div class="col-sm-12">
+            <div class="card border border-success" style="margin: 0 -10px 10px -10px ; padding: 2% ">
+
+                <span><b>Task id :</b> {{ task.id }}</span>
+                {% if task.description != '' %}<span><b>    {{ task.description }}</b></span>{% endif %}
+                <span><b>Products SKU : </b>{{ task.data }}</span>
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="task_id" value={{ task.id }}>
+                    {% if task.description == 'In progress...' %}
+                        <button class="btn btn-danger" formaction="{% url 'task:delete_task' %}" type="submit" disabled>Delete
+                        </button>
+                    {% else %}
+                        <button class="btn btn-danger" formaction="{% url 'task:delete_task' %}" type="submit">Delete</button>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% endblock %}
