@@ -1,0 +1,83 @@
+<div class="modal  fade confirmModal{{ forloop.counter }}-modal-lg"
+     id="confirmModal{{ forloop.counter }}" tabindex="-1" role="dialog"
+     aria-labelledby="confirmModal{{ forloop.counter }}Label" aria-hidden="true">
+    <div class="modal-dialog modal-lg " role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmModal{{ forloop.counter }}Label">
+                    Confirm add to cart</h5>
+                <button type="button" class="close" data-dismiss="modal"
+                        aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                {% for supplier, accounts in selected_supplier_accounts.items %}
+                    {% if supplier == product.supplier %}
+
+                        {% for account in accounts %}
+                            <div>You are going add product to cart with supplier
+                                account:
+                            </div>
+                            <div style="margin: 0px 0px 0px 25px">
+                                <div>   Username: {{ account.username }}</div>
+                                <div>   Email: {{ account.email }}</div>
+                                <div>   Password: {{ account.password }}</div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary"
+                                        data-dismiss="modal">Close
+                                </button>
+                                <a href=" {% url "supplier_account:supplier_accounts" %}"
+                                   type="button" class="btn btn-warning">Select
+                                    another supplier account</a>
+                                <button type="submit" class="btn btn-primary">Place
+                                    with current supplier account
+                                </button>
+                            </div>
+                        {% empty %}
+                            {% for sup_code, supp in suppliers.items %}
+                                {% if sup_code == product.supplier %}
+                                    <div>Supplier account for supplier
+                                        <b>{{ supp }}</b> not selected
+                                    </div>
+                                    <div>Please select account and try again</div>
+                                    <div class="modal-footer">
+                                        <button type="button"
+                                                class="btn btn-secondary"
+                                                data-dismiss="modal">Close
+                                        </button>
+                                        <a href=" {% url "supplier_account:supplier_accounts" %}"
+                                           type="button" class="btn btn-warning">Select
+                                            supplier account</a>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        {% endfor %}
+                    {% endif %}
+                {% empty %}
+                    {% for sup_code, supp in suppliers.items %}
+                        {% if sup_code == product.supplier %}
+                            <div>Supplier account for supplier
+                                <b>{{ supp }}</b> not selected
+                            </div>
+                            <div>Please select account and try again</div>
+                            <div class="modal-footer">
+                                <button type="button"
+                                        class="btn btn-secondary"
+                                        data-dismiss="modal">Close
+                                </button>
+                                <a href=" {% url "supplier_account:supplier_accounts" %}"
+                                   type="button" class="btn btn-warning">Select
+                                    supplier account</a>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endfor %}
+
+            </div>
+
+        </div>
+    </div>
+</div>
