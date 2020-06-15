@@ -1,0 +1,14 @@
+{% extends "base_generic.html" %}
+
+{% block title%}Images{% endblock%}
+
+{% block content %}
+    <div class="row">
+    {% for image in order_status.orderstatusimage_set.all %}
+        <div class="col">
+            <p> {{ forloop.counter }}. {{ image.tag|title }}</p>
+            <a target="_self" href="{{ image.status_image.url }}"><img  src="{{ image.status_image.url }}"></a>
+        </div>
+    {% endfor %}
+    </div>
+{% endblock %}

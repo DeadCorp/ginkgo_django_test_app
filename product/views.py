@@ -1,6 +1,5 @@
 from django.views import generic
 
-from order.models import Order
 from product.models import Product
 
 

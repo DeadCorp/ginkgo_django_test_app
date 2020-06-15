@@ -30,6 +30,7 @@ urlpatterns = [
     path('products/', include('product.urls')),
     path('task/', include('task.urls')),
     path('supplier_account/', include('supplieraccount.urls')),
+    path('order/', include('order.urls')),
 ]
 
 urlpatterns += staticfiles_urlpatterns()
