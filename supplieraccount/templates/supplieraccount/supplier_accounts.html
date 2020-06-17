@@ -1,0 +1,55 @@
+{% extends 'base_generic.html' %}
+
+{% block title %} Suppliers {% endblock %}
+
+{% block content %}
+    <a class="btn btn-primary" href="{% url 'supplier_account:add_supplier_account' %}?next={{ request.path }}">Add
+        Supplier</a>
+    <ul class="nav nav-tabs" style="margin: 30px 0px 0px 0px" id="myTab" role="tablist">
+        {% for supplier_code, supplier_name in suppliers.items %}
+            <li class="nav-item">
+                <a {% if forloop.first %}class="nav-link active" {% else %}class="nav-link"{% endif %}
+                   id="{{ supplier_name }}-tab" data-toggle="tab" href="#{{ supplier_name }}" role="tab"
+                   aria-controls="{{ supplier_name }}" aria-selected="true">{{ supplier_name }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+    <div class="tab-content" id="myTabContent">
+        {% for supplier_code, supplier_name in suppliers.items %}
+            <div {% if forloop.first %}class="tab-pane fade show active"{% else %} class="tab-pane fade"{% endif %}
+                 id="{{ supplier_name }}" role="tabpanel" aria-labelledby="{{ supplier_name }}-tab">
+                <div class="card border border-success " style="padding: 25px ; margin: 1% 0 1% 0 ">
+                    <div class="row">
+                        {% for account_supplier_code, account_list in accounts.items %}
+                            {% if account_supplier_code == supplier_code %}
+                                {% for user_supplier_code, user_accounts in user_selected_accounts.items %}
+                                    {% if user_supplier_code == account_supplier_code %}
+                                        {% for user_account in user_accounts %}
+                                            {% with account=user_account.supplier_account %}
+                                                {% include 'supplieraccount/supplier_accounts_generic.html' %}
+                                            {% endwith %}
+                                        {% endfor %}
+                                    {% endif %}
+                                {% endfor %}
+                                {% for account in account_list %}
+                                    {% include 'supplieraccount/supplier_accounts_generic.html' %}
+                                {% empty %}
+                                    {% for user_supplier_code, user_accounts in user_selected_accounts.items %}
+                                        {% if user_supplier_code == account_supplier_code %}
+                                            {% for user_account in user_accounts %}
+                                            {% empty %}
+                                                No accounts for this supplier
+                                            {% endfor %}
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endfor %}
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+
+{% endblock %}

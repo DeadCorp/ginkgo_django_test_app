@@ -1,0 +1,98 @@
+<div class="card border border-success " style="border: solid 1px black; padding: 20px; margin: 20px 0px 20px 0px; ">
+    <div class="row">
+        <div class="col-lg-7">
+            <p><b>Product SKU : </b><a name="{{ product.sku }}"
+                                       href="{% url 'product:detail' product.sku %}">{{ product.sku }}</a></p>
+            {% if product.name == 'not found' %}
+                {% if product.is_variant and product.option_id == 'incorrect option id' %}
+                    <b>This product have options id, but you not set it</b>
+                {% else %}
+                    <b>This product was not found in shop</b>
+                {% endif %}
+            {% else %}
+                <p><b>Name : </b>{{ product.name }} </p>
+                {% if product.variants_tag != '' and product.variants_tag != 'is unknown' %}
+                    <p><b>Variant : </b>{{ product.variants_tag }} </p>{% endif %}
+                <p><b>Price : </b>{{ product.price }}
+                    {% if product.delivery_price != 'is unknown' and product.delivery_price != '' %}
+                        <b>Delivery price : </b>{{ product.delivery_price }} {% endif %}</p>
+                <p><b>Available : </b> {{ product.available }}
+{#                    {% if product.available_count != '' and product.available_count != 'is unknown' %}#}
+{#                        <b>Available count : </b>{{ product.available_count }} {% endif %}</p>#}
+
+                {% if user.is_authenticated %}
+                    <form action="{% url "order:add_to_cart" %}" method="post">
+                        {% csrf_token %}
+                        <div>
+                            <label for="product_count"> Set Qty </label>
+                            <input id="product_count" name="product_count" type="number" min="1" value=1 required>
+                            <input type="hidden" name="sku" value="{{ product.sku }}">
+                            {% if product.delivery_price != 'No delivery' %}
+                                {% if not product.delivery and not product.shipping %}
+                                    <input type="submit" value="Add to Cart" class="btn btn-primary btn-sm" disabled>
+                                     <a class="btn btn-sm btn-info " style="margin: 0px 50px 0px 0px" href="{% url "order:display_my_orders" product %}">Product orders</a>
+                                    <br><br>
+                                    <div class="alert alert-danger">No delivery</div>
+                                {% else %}
+                                    <button type="button" class="btn btn-primary btn-sm" data-toggle="modal"
+                                            data-target="#confirmModal{{ forloop.counter }}">Add to cart
+                                    </button>
+                                     <a class="btn btn-sm btn-info " style="margin: 0px 50px 0px 0px" href="{% url "order:display_my_orders" product %}">Product orders</a>
+                                    <br><br>
+                                    {% include 'product/confirm_modal.html' %}
+                                {% endif %}
+                            {% elif product.delivery_price == 'No delivery' %}
+                                <input type="submit" value="Add to Cart" class="btn btn-primary btn-sm" disabled>
+                                 <a class="btn btn-sm btn-info " style="margin: 0px 50px 0px 0px" href="{% url "order:display_my_orders" product %}">Product orders</a>
+                                <br><br>
+                                <div class="alert alert-danger">No delivery</div>
+                            {% endif %}
+                        </div>
+                    </form>
+                {% endif %}
+                {% if product.brand != '' and product.brand != 'is unknown' %} <p><b>Brand : </b>{{ product.brand }}</p>
+                {% endif %}
+                {% if product.model != '' and product.model != 'is unknown' %} <p><b>Model : </b>{{ product.model }}</p>
+                {% endif %}
+                <p><b>Url on shop : </b><a href="{{ product.url }}"> To shop </a></p>
+
+                <div class="accordion" id="description{{ forloop.counter }}">
+                    <div class="card">
+                        <div class="card-header" id="heading{{ forloop.counter }}">
+                            <h2 class="mb-0">
+                                <button class="btn btn-link" type="button" data-toggle="collapse"
+                                        data-target="#collapse{{ forloop.counter }}" aria-expanded="true"
+                                        aria-controls="collapse{{ forloop.counter }}">
+                                    Description
+                                </button>
+                            </h2>
+                        </div>
+                        <div id="collapse{{ forloop.counter }}" class="collapse" aria-labelledby="headingOne"
+                             data-parent="#description{{ forloop.counter }}">
+                            <div class="card-body">
+                                {{ product.description | truncatewords:200 }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <p><b>Rating : </b>{{ product.rating }}</p>
+                <p><b>Category : </b>{{ product.category }}</p>
+            {% endif %}
+        </div>
+
+        <p class="col">
+            {% if user.is_authenticated %}
+                <a href="{% url 'task:refresh_product_data' product.sku %}?next={{ product.sku }}"
+                   class="btn  btn-info float-right">Refresh product data</a>
+            {% endif %}
+        {% if product.name != 'not found' and product.img != None %}
+            <br>
+            <img style="width:350px;height:400px; margin: 10px" class="float-right"
+                 src="{% if 'http' in product.img %}{{ product.img }}
+                                                             {% else %}http://{{ product.img }}
+                                                             {% endif %}">
+        {% endif %}
+        </p>
+    </div>
+</div>

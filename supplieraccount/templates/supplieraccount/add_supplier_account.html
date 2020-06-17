@@ -1,0 +1,23 @@
+{%  extends 'base_generic.html' %}
+
+{% block title %} Add Supplier account {% endblock %}
+
+{% block content %}
+    <form method="post" class="form-group">
+    {% csrf_token %}
+    <label for="id_supplier">Supplier:</label>
+    <select class="form-control" name="supplier" id="id_supplier">
+        {% for i in form.supplier %}
+            {{ i }}
+        {% endfor %}
+    </select>
+    <label for="id_username">Username:</label><input class="form-control" type="text" name="username" maxlength="30" id="id_username" autocomplete="off">
+    <label for="id_email">Email:</label><input class="form-control" type="email" name="email" maxlength="30" required="" id="id_email" autocomplete="off" >
+    <label for="id_password">Password:</label><input class="form-control" type="text" name="password" maxlength="30" required="" id="id_password" autocomplete="off" >
+
+    <input type="hidden" name="next" value="{{ request.GET.next }}">
+    <button type="submit" style="margin: 15px 0px 0px 0px" class="btn btn-success">Add Supplier</button>
+
+    </form>
+
+{% endblock %}

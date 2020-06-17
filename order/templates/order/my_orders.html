@@ -1,0 +1,69 @@
+{% extends 'base_generic.html' %}
+{% block title %} My orders {% endblock %}
+
+{% block content %}
+    {% for order in my_orders %}
+    {% empty %}
+            <h2 style="text-align: center">No orders</h2>
+    {% endfor %}
+    <div class="row">
+        {% for order in my_orders %}
+            <div class="col-6">
+            {% for statused in order.orderstatus_set.all %}
+                {% if statused.status != None %}
+                    {% if statused.status == 'SUCCESS' %}
+                        <div class="card border-success" style="margin: 5px">
+                    {% elif statused.status == 'IN_PROGRESS' %}
+                        <div class="card border-secondary" style="margin: 5px">
+                    {% else %}
+                        <div class="card border-danger" style="margin: 5px">
+                    {% endif %}
+                        <div style="margin: 25px">
+                            <div><b>Order id: </b>{{ order.order_id }}</div>
+                            <div><b>Product SKU: </b>{{ order.product }}</div>
+                            <div><b>Supplier account: </b>{{ order.account }}</div>
+
+                            <div><b>Quantity: </b>{% if order.quantity %}{{ order.quantity }}{% else %}unknown{% endif %}</div>
+
+                            <div><b>Price: </b>{% if order.price %}{{ order.price }}{% else %}unknown{% endif %}</div>
+
+                            {% for statused in order.orderstatus_set.all %}
+                                {% if statused.status == 'SUCCESS' %}
+                                    <div class="alert alert-success"><a href="{% url 'order:order_status_image' statused.pk %}">
+                                        Order status: {{ statused.get_status_display }}</a></div>
+                                {% elif statused.status == 'IN_PROGRESS' %}
+                                    <div class="alert alert-secondary"><a
+                                            href="{% url 'order:order_status_image' statused.pk %}"> Order
+                                        status: {{ statused.get_status_display }}</a></div>
+                                {% else %}
+                                    <div class="alert alert-danger"><a href="{% url 'order:order_status_image' statused.pk %}">
+                                        Order status: {{ statused.get_status_display }}</a></div>
+                                {% endif %}
+
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="card border-danger">
+                        <div style="margin: 25px">
+                            <div><b>Order id: </b>{{ order.order_id }}</div>
+                            <div><b>Product SKU: </b>{{ order.product }}</div>
+                            {% for statused in order.orderstatus_set.all %}
+                                {% if statused.status == None %}
+                                    <div class="alert alert-danger"><a href="{% url 'order:order_status_image' statused.pk %}">
+                                        Order Fail. Please try again</a></div>
+
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+
+        </div>
+
+        {% endfor %}
+
+
+        </div>
+{% endblock %}
