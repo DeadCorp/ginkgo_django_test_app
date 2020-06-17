@@ -34,15 +34,6 @@ class OrderStatus(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, verbose_name='Order', default=None)
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='NOTHING', blank=True)
 
-    def delete(self, using=None, keep_parents=False):
-        obj = OrderStatus.objects.get(pk=self.pk)
-        images = obj.orderstatusimage_set.all()
-        for i in images:
-            if i != 'status_image/':
-                i.status_image.delete()
-                i.delete()
-        super(OrderStatus, self).delete()
-
     def __str__(self):
         return f'Status for product: {self.order.product} for user: {self.order.user}'
 

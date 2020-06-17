@@ -5,7 +5,7 @@ from final.forms import RegisterForm
 
 
 def index(request):
-    return render(request, 'index.html')
+    return redirect('product:products')
 
 
 def register(request):
@@ -22,7 +22,7 @@ def register(request):
             wrong = 'Invalid data'
             return render(request, 'registration/register.html', {'form': form, 'wrong': wrong})
         if request.POST.get('next') == ('/accounts/login/' or 'accounts/register/'):
-            return redirect('/')
+            return redirect('product:products')
         else:
             return redirect(request.POST.get('next'))
     else:
@@ -30,6 +30,6 @@ def register(request):
         if request.user.is_anonymous:
             form = RegisterForm()
         else:
-            return redirect('/')
+            return redirect('product:products')
 
     return render(request, 'registration/register.html', {'form': form})

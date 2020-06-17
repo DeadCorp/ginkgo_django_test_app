@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'task',
     'supplieraccount',
     'order',
+    'django_cleanup.apps.CleanupConfig',
 ]
 
 MIDDLEWARE = [
@@ -125,7 +126,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 MEDIA_URL = '/media/'
-LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = 'product/products/'
 
 # Redis and Celery settings
 REDIS_HOST = '127.0.0.1'
