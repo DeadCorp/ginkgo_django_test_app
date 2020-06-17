@@ -84,6 +84,7 @@ def select_supplier_account(request):
 
 def delete_user_supplier_account(user, supplier):
     # try delete selected supplier account for user
+    # it for  storage only one selected supplier account for one  user
     try:
         user_account_already_selected = UserSupplierAccount.objects.get(
             supplier_account__supplier=supplier, user=user, is_selected_account=True)

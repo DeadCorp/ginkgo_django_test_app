@@ -10,8 +10,7 @@ class ProductListView(generic.ListView):
     paginate_by = 5
 
     def get_queryset(self):
-        products = Product.objects.all()
-        return ordering(products)
+        return ordering(Product.objects.all())
 
 
 class ProductDetailView(generic.DetailView):
