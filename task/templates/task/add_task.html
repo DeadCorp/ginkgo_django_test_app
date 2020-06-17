@@ -7,11 +7,11 @@
         {% csrf_token %}
         <input type="hidden" name="user_id" value="{{ request.user.id }}">
         <label for="sku">
-            <pre>Write products SKU, separate them with spaces</pre>
+            <pre>Write products SKU, separate them with spaces or new line</pre>
             <pre>Format:</pre>
             <pre><b>    On start need write Server code - 1 letters, and symbol '_' without quotes  like :</b> M_ </pre>
             <pre><b>    next need write supplier code - 2 letters, and symbol '_' without quotes  like :</b> M_KM_ </pre>
-            <pre><b>    If product not have option need write just id after supplier code like :</b> M_KM_0000000000 <b>or</b> M_KM_0000000000#</pre>
+            <pre><b>    If product not have option need write just id after supplier code like :</b> M_KM_0000000000</pre>
             <pre><b>    If product have option, need write option id after product id and symbol '#'  like :</b> M_KM_0000000000#1111111111 </pre>
             <pre>    Also you can add letter after symbol '-' like : M_KM_0000000000#1111111111-A <b>or</b> M_KM_0000000000-A</pre>
             <pre>    And you can add quantity after symbol '$' like : M_KM_0000000000#1111111111-A$10 <b>or</b> M_KM_0000000000$10</pre>

@@ -9,6 +9,7 @@ from task.models import Task
 
 @login_required()
 def refresh_product_data(request, sku):
+    # create new task with 1 sku for update product data
     obj = Task(user_id=request.user, data=sku)
     obj.save()
     return HttpResponseRedirect(request.META.get('HTTP_REFERER') + '#' + sku)
