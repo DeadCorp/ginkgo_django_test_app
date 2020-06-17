@@ -4,7 +4,7 @@
 
 {% block content %}
     <a class="btn btn-primary" href="{% url 'supplier_account:add_supplier_account' %}?next={{ request.path }}">Add
-        Supplier</a>
+        Supplier Account</a>
     <ul class="nav nav-tabs" style="margin: 30px 0px 0px 0px" id="myTab" role="tablist">
         {% for supplier_code, supplier_name in suppliers.items %}
             <li class="nav-item">

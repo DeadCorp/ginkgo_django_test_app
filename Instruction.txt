@@ -1,0 +1,104 @@
+Інструкція UA
+    Клонуєм репозиторій
+    Cтворюємо віртуальне середовище: python3.8 -m venv venv
+    Активовуємо його: source venv/bin/activate
+    Встановлюємо потрібні бібліотеки: pip3.8 install -r requirements.txt
+    База даних вже присутня у репозиторії, і суперкористувач для цієї бази це:
+        username: deadcorp
+        password: 111222333000qwa
+    Можна створити свого суперкористувача за допомогою команди: python manage.py createsuperuser
+    Далі потрібно налаштувати базу даних Redis.
+        Для цього  у терміналі по черзі потрібно вписати наступні команди:
+            wget http://download.redis.io/redis-stable.tar.gz
+            tar xvzf redis-stable.tar.gz
+            cd redis-stable
+            make
+
+            sudo cp src/redis-server /usr/local/bin/
+            sudo cp src/redis-cli /usr/local/bin/
+
+            І запустити саму базу даних командою: redis-server
+    Далі потрібно запустити Сelery воркера для виконання поклажі в корзину у бекграунді: celery -A final worker -l info
+
+    Тепер можна запустити сервер Django командою: python manage.py runserver
+
+    Тепер у браузері можна перейти по адресі http://127.0.0.1:8000/ в результаті відкриється сторінка Products на якій представлені усі продукти в базі даних.
+    У кожного продукту є 3 кнопки:
+        Кнопка Refresh product data - дозволяє обновити дані про продукт і отримати актуальну інформацію.
+        Кнопка Product orders - перенаправляє користувача на сторінку, де він може переглянути усі його замовлення цього конкретного продукту,
+            під кожним замовлення відображено статус замовлення, і по натисненню на статус користувача перенаправляє на сторінку де можна передивитися знімки зроблені під час замовлення.
+        Кнопка Add to cart - Після її натиснення користувачу видається модальне вікно, з інформацією про акаунт з яким він збирається зробити поклажу до корзини,
+            та пропонує змінити акаунт або продовжити поклажу з вибраним акаунтом, або відмінити поклажу.
+                При виборі варіанту зміни аккаунта, користувача перенаправляє на сторінку, де представлені усі акаунти, і після вибору потрібного акаунта,
+                 користувачу потрібно самостійно повернутись до товару який він хотів замовити та повторити замовлення.
+                При продовженні поклажі, створюється замовлення і розпочинається процес поклажі в корзину, який невидно користувачеві.
+                    Результат цього, та інших замовленнь користувач може переглянути натиснувши кнопку Product orders, біля відповідного товару.
+    У меню навігації зверху розміщено посилання на сторінку Products, що описана вище.
+        Якщо користувач неавторизований на сайті він бачить посилання лише на цю сторінку, та посилання на сторінку входу та реєстрації.
+    Якщо користувач авторизований, то він бачить ще посилання на сторінку Search products i Supplier accounts.
+
+        Сторінка Search products - сторінка для пошуку товарів на сатах поставщиків.На ній присутнє поле для вводу SKU товарів,
+            формат їх вводу розписаний на цій сторінці.
+            Під полем вводу представлені 5 останніх пошуків, де знаходиться інформація про кількість знайдених продуктів, та час витрачений на їх пошук,
+             та перелік СКУ знайдених продуктів.
+            Після початку пошуку відбувається розбиття введених СКУ та запускається Scrapy spider який виконує пошук та витягування даних.
+
+        Сторінка Supplier accounts - на цій сторінці представлені усі акаунти поставщиків які можуть бути використані будь яким користувачем для поклажі товару у корзину.
+            Акаунти посортовані по вкладках з назвою поставщика.
+            У звичайного користувача є можливість вибрати будь який акаунт, та додати акаунт.
+            Суперкористувач може також видаляти будь який акаунт.
+            Користувач може вибрати лише 1 акаунт для одного поставщика.
+                Вибраний акаунт буде відображатись першим у списку, та у нього буде неактивна клавіша вибору.
+            По натисненню кнопки Add Supplier Account користувача перенаправляє на сторінку додавання акаунта, де потрібно вибрати поставщика та заповнити інші дані.
+
+Instruction EN
+    Clone repository
+    Create a virtual environment: python3.8 -m venv venv
+    Activate it: source venv/bin/activate
+    Install the necessary libraries: pip3.8 install -r requirements.txt
+    The database is already present in the repository, and the superuser for this database is:
+        username: deadcorp
+        password: 111222333000qwa
+    You can create your superuser with the command: python manage.py createsuperuser
+    Next you need to configure the database Redis.
+        To do this, enter the following commands in turn in the terminal:
+            wget http://download.redis.io/redis-stable.tar.gz
+            tar xvzf redis-stable.tar.gz
+            cd redis-stable
+            make
+
+            sudo cp src/redis-server /usr/local/bin/
+            sudo cp src/redis-cli /usr/local/bin/
+
+            And run the database  a team: redis-server
+    Next you need to run Сelery worker to carry luggage in the basket in the background: celery -A final worker -l info
+    You can now start the Django server with the command: python manage.py runserver
+
+    Now in the browser you can go to the address http://127.0.0.1:8000/ as a result, the Products page opens, which presents all the products in the database.
+    Each product has 3 buttons:
+        Refresh product data button - allows you to update product data and get up-to-date information.
+        Product orders button - redirects the user to a page where he can view all his orders for this particular product,
+            under each order the status of the order is displayed, and after clicking on the status of the user redirects to the page,
+            where you can view the pictures taken during the order.
+        Add to cart button - After clicking it, the user is given a modal window with information about the account with which he is going to make luggage to the basket,
+             and offers to change the account or extend the baggage with the selected account, or cancel the baggage.
+             When selecting the option to change the account, the user is redirected to the page where all the accounts are presented, and after selecting the desired account,
+                  the user must return to the product he wanted to order and repeat the order.
+             When the luggage is extended, an order is created and the baggage process begins in the basket, which is invisible to the user.
+                 The user can view the result of this and other orders by clicking the Product orders button next to the corresponding product.
+    In the navigation menu at the top there is a link to the Products page described above.
+        If the user is not authorized on the site, he sees a link only to this page, and a link to the login and registration page.
+    If the user is authorized, he sees a link to the page Search products and Supplier accounts.
+
+        Search products page - a page for searching for goods on the suppliers' hours. There is a field for entering SKU goods, the format of their input is painted on this page.
+          Below the input field are the last 5 searches, which contains information about the number of products found, and the time spent searching for them,
+              and list SKU products found.
+            After the start of the search, the entered SKUs are split and the Scrapy spider is started, which performs the search and retrieval of data.
+
+        Supplier accounts page - this page presents all vendor accounts that can be used by any user to put the product in the cart.
+          Accounts are sorted by tabs with the name of the supplier.
+            The average user has the ability to select any account and add an account.
+            The superuser can also delete any account.
+            The user can select only 1 account for one supplier.
+                The selected account will be displayed first in the list, and it will have an inactive selection key.
+           By clicking the Add Supplier Account button, the user is redirected to the account addition page, where you need to select a provider and fill in other data.
