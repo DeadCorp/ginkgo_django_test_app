@@ -146,7 +146,7 @@ class SamsClubScraper(object):
                 'rating'] = f'Star - {payload.get("reviewRating", self.UNKNOWN)},' \
                             f' reviews - {payload.get("reviewCount", self.UNKNOWN)}'
 
-            if payload.get('clubPricing', {}) == {}:
+            if payload.get('onlinePricing', {}) != {}:
                 self.item['price'] = payload.get('onlinePricing', {}).get('finalPrice').get('currencyAmount',
                                                                                             self.UNKNOWN)
                 self.item['available'] = payload.get('onlineInventory', {}).get('status', self.UNKNOWN)
