@@ -34,7 +34,7 @@ def add_to_cart(request):
                 add_to_cart_kmart.delay(parameters)
 
     return HttpResponseRedirect((request.META.get('HTTP_REFERER') + '#' + request.POST['sku'])
-                                or request.META.get('HTTP_REFERER'))
+                                if request.POST['sku'] else request.META.get('HTTP_REFERER'))
 
 
 @login_required()
