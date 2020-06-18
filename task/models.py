@@ -7,6 +7,7 @@ from django.db import models
 
 from product.utils import parse_sku
 from supplieraccount.models import SupplierCodes
+from .scrapers.request_scrapers.scraper_samsclub import SamsClubScraper
 
 
 class Task(models.Model):
@@ -22,9 +23,15 @@ class Task(models.Model):
         super(Task, self).save()
 
         for supplier_code in sorted_sku:
-            if len(sorted_sku[supplier_code]) != 0:
-                supplier = SupplierCodes.SUPPLIERS[supplier_code]
-                run_spider(self, supplier)
+            # temp for test new no Scrapy scraper for SamsClub
+            if supplier_code == 'SC':
+                if len(sorted_sku[supplier_code]) != 0:
+                    scraper = SamsClubScraper(sorted_sku[supplier_code])
+                    scraper.run()
+            else:
+                if len(sorted_sku[supplier_code]) != 0:
+                    supplier = SupplierCodes.SUPPLIERS[supplier_code]
+                    run_spider(self, supplier)
 
     def __str__(self):
         return f'{self.user_id} task: {self.pk}'

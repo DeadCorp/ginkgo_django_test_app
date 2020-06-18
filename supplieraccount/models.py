@@ -6,6 +6,7 @@ class SupplierCodes(object):
     SUPPLIERS = {
         'WM': 'Walmart',
         'KM': 'Kmart',
+        'SC': 'SamsClub',
 
     }
 
