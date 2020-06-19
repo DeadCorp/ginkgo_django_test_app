@@ -39,7 +39,7 @@
                                     </button>
                                      <a class="btn btn-sm btn-info " style="margin: 0px 50px 0px 0px" href="{% url "order:display_my_orders" product %}">Product orders</a>
                                     <br><br>
-                                    {% include 'product/confirm_modal.html' %}
+                                    {% include 'product/confirm_modal2.html' %}
                                 {% endif %}
                             {% elif product.delivery_price == 'No delivery' %}
                                 <input type="submit" value="Add to Cart" class="btn btn-primary btn-sm" disabled>
