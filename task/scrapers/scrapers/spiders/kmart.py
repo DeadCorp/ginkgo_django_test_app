@@ -5,6 +5,8 @@ import re
 from urllib.parse import urljoin
 
 import scrapy
+
+from .walmart import WalmartSpider
 from ..items import ProductItem
 from task.models import Task
 
@@ -16,22 +18,10 @@ class KmartSpider(scrapy.Spider):
     name = 'kmart'
     allowed_domains = ['kmart.com']
     start_urls = ['http://kmart.com/']
-
     custom_settings = {
-        'DEFAULT_REQUEST_HEADERS': {
-            'accept': 'application/json, text/javascript, */*; q=0.01',
-            'accept-encoding': 'gzip, deflate, br',
-            'accept-language': 'uk-UA,uk;q=0.9,en-US;q=0.8,en;q=0.7',
-            'cache-control': 'no-cache',
-            'content-type': 'application/json',
-            'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
-            'x-requested-with': 'XMLHttpRequest',
-            'authid': 'aA0NvvAIrVJY0vXTc99mQQ==',
-        },
         'ITEM_PIPELINES': {
             'scrapers.pipelines.KmartProductPipeline': 400,
         },
-
     }
     API_SEARCH_URL = 'https://www.kmart.com/service/search/v2/productSearch?catalogId=10104&keyword={product_id}&' \
                      'rmMattressBundle=true&searchBy=keyword&storeId=10151&tabClicked=All&zip={zip_code}'
@@ -49,8 +39,7 @@ class KmartSpider(scrapy.Spider):
     def __init__(self, task_id):
         self.task = Task.objects.get(id=task_id)
         self.supplier = 'KM'
-        self.to_parse = json.loads(self.task.data)
-        self.to_parse = self.to_parse[self.supplier]
+        self.to_parse = json.loads(self.task.data)[self.supplier]
         self.parsed_count = 0
         self.sku_storage = []
 
@@ -293,43 +282,7 @@ class KmartSpider(scrapy.Spider):
         yield item
 
     @staticmethod
-    def take_num(line):
-        response = re.findall(r'\d*\.\d+|\d+', line)
-        return response
-
     def close(spider, reason):
-        end_time = loop.time()
-        total_time = end_time - spider.start_time
-        scrap_time = 'Spent time from scraping: {total_time} ' \
-                     'seconds  Found {parsed_count} of {count_to_parse} product'
-
-        task = Task.objects.filter(id=spider.task.id)
-        new_text = json.loads(task[0].data)
-
-        task_time_text = task[0].description
-
-        if task_time_text != 'In progress...':
-            numbers_from_task = spider.take_num(task_time_text)
-            time_from_task = numbers_from_task[0]
-            parsed_count = numbers_from_task[1]
-            count_to_parse = numbers_from_task[2]
-            format_dict = {
-                'parsed_count': str(int(parsed_count) + int(spider.parsed_count)),
-                'count_to_parse': str(int(count_to_parse) + len(spider.to_parse)),
-                'total_time': str(float(time_from_task) + total_time)
-            }
-            scrap_time = scrap_time.format(**format_dict)
-            for sku in spider.sku_storage:
-                new_text.append(sku)
-        else:
-            format_dict = {
-                'parsed_count': spider.parsed_count,
-                'count_to_parse': len(spider.to_parse),
-                'total_time': total_time
-            }
-            scrap_time = scrap_time.format(**format_dict)
-            new_text = [sku for sku in spider.sku_storage]
-
-        task.update(description=scrap_time, data=json.dumps(new_text))
+        WalmartSpider.close(spider, reason)
 
 

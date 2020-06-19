@@ -4,6 +4,9 @@
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
+import re
+
+from bs4 import BeautifulSoup
 
 UNKNOWN = 'is unknown'
 
@@ -41,7 +44,11 @@ class WalmartProductPipeline:
                 item['delivery_price'] = self.no_delivery
         elif item['price'] == 'is unknown':
             item['delivery_price'] = self.no_delivery
-        item['description'] = ' '.join(item['description']) if len(item['description']) != 0 else 'is unknown'
+        if len(item['description']) != 0:
+            item['description'] = ''.join(item['description'])
+            item['description'] = re.sub(r'<button[^>]*>([\s\S]*?)<\/button>', '', item['description'])
+        else:
+            item['description'] = 'is unknown'
         item['category'] = ''.join(item['category']) if len(item['category']) != 0 else 'is unknown'
         item['rating'] = " Star ".join(item['rating']) if len(item['rating']) != 0 else 'is unknown'
 
@@ -82,12 +89,14 @@ class KmartProductPipeline:
         if item.get('variants_tag', UNKNOWN) != UNKNOWN:
             for tag in item['variants_tag']:
                 variants_tag.append(tag['name'] + ' : ' + tag['value'])
-            item['variants_tag'] = ' / '.join(variants_tag)
+            item['variants_tag'] = '; '.join(variants_tag)
 
         if item.get('category', UNKNOWN) != UNKNOWN:
             category = ' / '.join(item['category'])
             item['category'] = category
+        item['description'] = ''.join(item['description']) if item.get('description') else UNKNOWN
         item.save()
+
         return item
 
 
@@ -99,3 +108,23 @@ def create_sku(item, spider):
     item['option_id'] = UNKNOWN if not item['option_id'] else item['option_id']
     spider.sku_storage.append(item['sku'])
     return item
+
+
+class SamsClubProductPipeline:
+
+    def process_item(self, item, spider):
+        item = create_sku(item, spider)
+        if item.get('category'):
+            soup = BeautifulSoup(item['category'], 'html.parser')
+            categories = soup.select('ol.sc-breadcrumbs > li')
+            if categories is not None:
+                category = [category.text for category in categories]
+                item['category'] = ' / '.join(category)
+
+        item['available'] = 'Availability' if item.get('available') in ['inStoke', 'inStock', 'lowInStock'] else 'Out of stock'
+        if not item.get('shipping'):
+            item['shipping'] = True if item['available'] == 'Availability' else False
+        item['delivery_price'] = 'Free delivery' if item.get('delivery_price') == 0 else item.get('delivery_price')
+
+        item.save()
+        return item

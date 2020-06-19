@@ -17,3 +17,5 @@ class ProductItem(DjangoItem):
     letter = scrapy.Field()
     quantity = scrapy.Field()
     uid = scrapy.Field()
+    sku_id = scrapy.Field()
+    free_shipping_flag = scrapy.Field()

@@ -26,8 +26,7 @@ class WalmartSpider(scrapy.Spider):
     def __init__(self, task_id):
         self.task = Task.objects.get(id=task_id)
         self.supplier = 'WM'
-        self.to_parse = json.loads(self.task.data)
-        self.to_parse = self.to_parse[self.supplier]
+        self.to_parse = json.loads(self.task.data)[self.supplier]
         self.parsed_count = 0
         self.sku_storage = []
 
@@ -51,7 +50,7 @@ class WalmartSpider(scrapy.Spider):
         if response.status not in self.handle_httpstatus_list:
             item['brand'] = response.css("span[itemprop='brand']::text").get(default='is unknown')
             item['category'] = response.css('ol.breadcrumb-list span::text').getall()
-            item['description'] = response.css('div #about-product-section *::text').getall()
+            item['description'] = response.css('div #about-product-section > *').getall()
             item['name'] = response.css("h1[itemprop='name']::text").get(default='is unknown')
             item['price'] = response.css("span[itemprop='price']::attr(content)").get(default='is unknown')
             item['variants_tag'] = response.css("div.varslabel>span::text").getall()
@@ -84,6 +83,7 @@ class WalmartSpider(scrapy.Spider):
         response = re.findall(r'\d*\.\d+|\d+', line)
         return response
 
+    @staticmethod
     def close(spider, reason):
         end_time = loop.time()
         total_time = end_time - spider.start_time

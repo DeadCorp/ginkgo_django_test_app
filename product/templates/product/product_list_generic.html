@@ -70,7 +70,7 @@
                         <div id="collapse{{ forloop.counter }}" class="collapse" aria-labelledby="headingOne"
                              data-parent="#description{{ forloop.counter }}">
                             <div class="card-body">
-                                {{ product.description | truncatewords:200 }}
+                                {{ product.description | safe }}
                             </div>
                         </div>
                     </div>
