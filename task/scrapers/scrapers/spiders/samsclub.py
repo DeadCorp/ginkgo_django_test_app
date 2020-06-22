@@ -76,13 +76,16 @@ class SamsClubSpider(scrapy.Spider):
                     self.logger.info(f'Product {product_id} found, id is correct')
                 else:
                     self.logger.error(f'Found incorrect product - id {product_id}')
-                    self.not_found_product(item)
+                    yield self.not_found_product(item)
+                    return None
             else:
                 self.logger.error(f'Product {item["product_id"]} not found')
-                self.not_found_product(item)
+                yield self.not_found_product(item)
+                return None
         else:
             self.logger.error(f'Product {item["product_id"]} not found')
-            self.not_found_product(item)
+            yield self.not_found_product(item)
+            return None
 
         yield scrapy.Request(
             url=self.PRODUCT_DATA_URL.format(**item),
@@ -95,8 +98,7 @@ class SamsClubSpider(scrapy.Spider):
         item['name'] = 'not found'
         item['available'] = False
         item['delivery_price'] = 'No delivery'
-        yield item
-        return None
+        return item
 
     def take_product_data(self, response):
         item = response.meta.get('item')

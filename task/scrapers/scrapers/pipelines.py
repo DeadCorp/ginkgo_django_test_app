@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup
 UNKNOWN = 'is unknown'
 
 
-class WalmartProductPipeline:
+class WalmartProductPipeline(object):
     free = 'Free delivery'
     free_2 = 'Free 2-day delivery'
     fake_free = 'Free delivery on $35+'
@@ -68,7 +68,7 @@ class WalmartProductPipeline:
         return item
 
 
-class KmartProductPipeline:
+class KmartProductPipeline(object):
 
     def process_item(self, item, spider):
         item['product_id'] = UNKNOWN if not item['product_id'] else item['product_id']
@@ -110,7 +110,7 @@ def create_sku(item, spider):
     return item
 
 
-class SamsClubProductPipeline:
+class SamsClubProductPipeline(object):
 
     def process_item(self, item, spider):
         item = create_sku(item, spider)

@@ -116,7 +116,8 @@ class KmartSpider(scrapy.Spider):
         yield scrapy.Request(
             url=url,
             callback=self.parse_price,
-            meta={'item': item}
+            meta={'item': item},
+            headers={'authid': 'aA0NvvAIrVJY0vXTc99mQQ=='}
         )
 
     def rating_request(self, url, item):

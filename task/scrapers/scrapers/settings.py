@@ -54,7 +54,6 @@ DEFAULT_REQUEST_HEADERS = {
     'accept-language': 'uk-UA,uk;q=0.9,en-US;q=0.8,en;q=0.7',
     'cache-control': 'no-cache',
     'content-type': 'application/json',
-    'authid': 'aA0NvvAIrVJY0vXTc99mQQ==',
 }
 
 # Enable or disable spider middlewares
