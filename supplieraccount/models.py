@@ -16,22 +16,18 @@ class SupplierCodes(object):
 
 class SupplierAccount(models.Model):
     supplier = models.CharField(max_length=25, verbose_name='Supplier',
-                                choices=SupplierCodes.suppliers_dict_to_choices_tuple(SupplierCodes), default='')
+                                choices=SupplierCodes.suppliers_dict_to_choices_tuple(SupplierCodes()), default='')
     username = models.CharField(max_length=30, verbose_name='Username', default='', blank=True)
     email = models.EmailField(max_length=30, verbose_name='Email', default='')
     password = models.CharField(max_length=30, verbose_name='Password', default='')
 
-    def __str__(self):
-        return f'Supplier: {self.supplier}, email: {self.email}'
-
-
-class UserSupplierAccount(models.Model):
-    # This model is to ensure that the supplier account does not change for all users,
-    # when one of the users changes the account
-    # For one supplier and one user can be selected only one supplier account
-    supplier_account = models.ForeignKey(SupplierAccount, on_delete=models.CASCADE, verbose_name='Supplier account')
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name='User')
-    is_selected_account = models.BooleanField(verbose_name='Selected account', default=False, blank=True)
+    def save(self):
+        # if for supplier exist account with this email, notify user about it
+        try:
+            exist = SupplierAccount.objects.get(supplier=self.supplier, email=self.email)
+        except SupplierAccount.DoesNotExist:
+            super(SupplierAccount, self).save()
 
     def __str__(self):
-        return f'{self.supplier_account} for User: {self.user}'
+        return f'ID - {self.pk}; Supplier: {self.supplier}; ' \
+               f'Username: {self.username}; Email: {self.email}'

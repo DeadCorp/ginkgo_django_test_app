@@ -1,0 +1,37 @@
+<div class="modal  fade confirmModal{{ forloop.counter }}-modal-xl"
+     id="confirmModal{{ forloop.counter }}" tabindex="-1" role="dialog"
+     aria-labelledby="confirmModal{{ forloop.counter }}Label" aria-hidden="true">
+    <div class="modal-dialog modal-xl " role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmModal{{ forloop.counter }}Label">
+                    Choose supplier account to place in cart</h5>
+
+                <button type="button" class="close" data-dismiss="modal"
+                        aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    {% for supplier, accounts in all_supplier_accounts.items %}
+                        {% if supplier == product.supplier %}
+                            {% for account in accounts %}
+                                {% include 'supplieraccount/supplier_accounts_generic.html' %}
+                            {% empty %}
+                                <span style="padding: 1.5%">No accounts for this supplier</span>
+                            {% endfor %}
+
+                        {% endif %}
+                    {% empty %}
+                    {% endfor %}
+                </div>
+            </div>
+        <div class="modal-footer col-xl-12" style="padding: 1%">
+            <a class="btn btn-primary"
+               href="{% url 'supplier_account:add_supplier_account' %}?next={{ request.path }}&supplier={{ product.supplier }}">
+                Add Supplier Account</a>
+        </div>
+        </div>
+    </div>
+</div>

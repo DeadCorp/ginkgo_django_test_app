@@ -13,9 +13,9 @@ from supplieraccount.models import SupplierAccount, SupplierCodes
 def add_to_cart(request):
     if request.method == 'POST':
         count = request.POST['product_count']
+
         product = Product.objects.get(sku=request.POST['sku'])
-        account = SupplierAccount.objects.get(supplier=product.supplier, usersupplieraccount__user=request.user,
-                                              usersupplieraccount__is_selected_account=True)
+        account = SupplierAccount.objects.get(id=request.POST['supplier_account_id'])
         order = Order(product=product, user_id=request.user.id, account=account)
         order.save()  # create order instance with current product user and supplier account
         order_status = OrderStatus(order=order, status='IN_PROGRESS')  # set status in_progress for created order
@@ -33,8 +33,8 @@ def add_to_cart(request):
             elif supplier_name == 'Kmart':
                 add_to_cart_kmart.delay(parameters)
 
-    return HttpResponseRedirect((request.META.get('HTTP_REFERER') + '#' + request.POST['sku'])
-                                if request.POST['sku'] else request.META.get('HTTP_REFERER'))
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER') + '#' + product.sku)
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
 @login_required()

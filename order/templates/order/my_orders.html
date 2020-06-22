@@ -18,14 +18,15 @@
                     {% else %}
                         <div class="card border-danger" style="margin: 5px">
                     {% endif %}
-                        <div style="margin: 25px">
-                            <div><b>Order id: </b>{{ order.order_id }}</div>
-                            <div><b>Product SKU: </b>{{ order.product }}</div>
-                            <div><b>Supplier account: </b>{{ order.account }}</div>
+                        <ul class="list-group list-group-flush" style="margin: 5px">
 
-                            <div><b>Quantity: </b>{% if order.quantity %}{{ order.quantity }}{% else %}unknown{% endif %}</div>
+                            <li class="list-group-item"><b>Order id: </b>{{ order.order_id }}</li>
+                            <li class="list-group-item"><b>Product SKU: </b>{{ order.product }}</li>
+                            <li class="list-group-item"><b>Supplier account: </b>{{ order.account }}</li>
 
-                            <div><b>Price: </b>{% if order.price %}{{ order.price }}{% else %}unknown{% endif %}</div>
+                            <li class="list-group-item"><b>Quantity: </b>{% if order.quantity %}{{ order.quantity }}{% else %}unknown{% endif %}</li>
+
+                            <li class="list-group-item"><b>Price: </b>{% if order.price %}{{ order.price }}{% else %}unknown{% endif %}</li>
 
                             {% for statused in order.orderstatus_set.all %}
                                 {% if statused.status == 'SUCCESS' %}
@@ -41,7 +42,7 @@
                                 {% endif %}
 
                             {% endfor %}
-                        </div>
+                        </ul>
                     </div>
                 {% else %}
                     <div class="card border-danger">
