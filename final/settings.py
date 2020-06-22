@@ -67,7 +67,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'supplieraccount.context_processors.selected_supplier_accounts'
+                'supplieraccount.context_processors.suppliers_and_accounts'
             ],
         },
     },

@@ -18,6 +18,12 @@
     <input type="hidden" name="next" value="{{ request.GET.next }}">
     <button type="submit" style="margin: 15px 0px 0px 0px" class="btn btn-success">Add Supplier</button>
 
+        {% for code, error in form.errors.items %}
+            <div class="alert alert-danger" style="margin: 1% 0 1% 0; padding: 1.5%">
+            {{ error|striptags }}
+            </div>
+        {% endfor %}
+
     </form>
 
 {% endblock %}

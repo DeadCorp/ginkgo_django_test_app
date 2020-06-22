@@ -18,30 +18,14 @@
         {% for supplier_code, supplier_name in suppliers.items %}
             <div {% if forloop.first %}class="tab-pane fade show active"{% else %} class="tab-pane fade"{% endif %}
                  id="{{ supplier_name }}" role="tabpanel" aria-labelledby="{{ supplier_name }}-tab">
-                <div class="card border-success " style="padding: 2.5%">
+                <div class="card border-success " style="padding: 1%">
                     <div class="row">
                         {% for account_supplier_code, account_list in accounts.items %}
                             {% if account_supplier_code == supplier_code %}
-                                {% for user_supplier_code, user_accounts in user_selected_accounts.items %}
-                                    {% if user_supplier_code == account_supplier_code %}
-                                        {% for user_account in user_accounts %}
-                                            {% with account=user_account.supplier_account %}
-                                                {% include 'supplieraccount/supplier_accounts_generic.html' %}
-                                            {% endwith %}
-                                        {% endfor %}
-                                    {% endif %}
-                                {% endfor %}
                                 {% for account in account_list %}
                                     {% include 'supplieraccount/supplier_accounts_generic.html' %}
                                 {% empty %}
-                                    {% for user_supplier_code, user_accounts in user_selected_accounts.items %}
-                                        {% if user_supplier_code == account_supplier_code %}
-                                            {% for user_account in user_accounts %}
-                                            {% empty %}
-                                                No accounts for this supplier
-                                            {% endfor %}
-                                        {% endif %}
-                                    {% endfor %}
+                                     <div class="custom-control" style="padding: 1%">No accounts for this supplier</div>
                                 {% endfor %}
                             {% endif %}
                         {% endfor %}

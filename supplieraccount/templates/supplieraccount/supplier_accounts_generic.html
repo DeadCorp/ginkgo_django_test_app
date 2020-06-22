@@ -1,5 +1,5 @@
 <div class="col-sm-4" >
-    <div class="card border-0" style=" margin: 1%">
+    <div class="card border-success" style=" margin: 1%">
         <div class="card-content">
         <ul class="list-group list-group-flush">
             <li class="list-group-item"><b>Username:</b>
@@ -14,13 +14,13 @@
 
         </ul>
         </div>
+        {% if request.path != '/supplier_account/' %}
+            <div class="card-action text-right ">
+                     <input type="hidden" name="supplier_account_id" value="{{ account.pk }}">
+                     <button type="submit" class="btn btn-success btn-block " >Select</button>
 
-        <div class="card-action text-right ">
-             <form  method="POST">
-             {% csrf_token %}
-                 <input type="hidden" name="supplier_account_id" value="{{ account.pk }}">
-                 <button class="btn btn-success btn-block " formaction="{%  url 'supplier_account:select_supplier_account' %}" type="submit">Select</button>
-             </form>
-        </div>
+
+            </div>
+        {% endif %}
     </div>
 </div>
