@@ -4,7 +4,7 @@ from django.shortcuts import render
 from django.views import generic
 
 from order.models import Order, OrderStatus
-from order.tasks import add_to_cart_walmart, add_to_cart_kmart
+from order.tasks import add_to_cart_walmart, add_to_cart_kmart, add_to_cart_samsclub
 from product.models import Product
 from supplieraccount.models import SupplierAccount, SupplierCodes
 
@@ -32,6 +32,8 @@ def add_to_cart(request):
                 add_to_cart_walmart.delay(parameters)
             elif supplier_name == 'Kmart':
                 add_to_cart_kmart.delay(parameters)
+            elif supplier_name == 'SamsClub':
+                add_to_cart_samsclub.delay(parameters)
 
         return HttpResponseRedirect(request.META.get('HTTP_REFERER') + '#' + product.sku)
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))

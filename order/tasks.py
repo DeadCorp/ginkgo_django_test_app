@@ -1,7 +1,15 @@
 from final.celery import app
 
-from order.autoplacers import placer_walmart, placer_kmart
+from order.autoplacers import placer_walmart, placer_kmart, placer_samsclub
 from order.models import OrderStatus, OrderStatusImage, Order
+
+
+@app.task(bind=True)
+def add_to_cart_samsclub(self, parameters_dict):
+    parameters_dict = set_order_id(self, parameters_dict)
+    selenium_instance = placer_samsclub.AutoPlacerSamsClub(**parameters_dict)
+    result_dict = selenium_instance.run()
+    save_status(result_dict, parameters_dict)
 
 
 @app.task(bind=True)

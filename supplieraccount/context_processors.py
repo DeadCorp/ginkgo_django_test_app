@@ -6,3 +6,7 @@ def suppliers_and_accounts(request):
         return {'suppliers': SupplierCodes.SUPPLIERS,
                 'all_supplier_accounts': {supplier_code: SupplierAccount.objects.filter(supplier=supplier_code)
                                           for supplier_code in SupplierCodes.SUPPLIERS}}
+    else:
+        return {'suppliers': {},
+                'all_supplier_accounts': {},
+                }
