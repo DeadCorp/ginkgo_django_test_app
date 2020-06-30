@@ -3,9 +3,6 @@
     Cтворюємо віртуальне середовище: python3.8 -m venv venv
     Активовуємо його: source venv/bin/activate
     Встановлюємо потрібні бібліотеки: pip3.8 install -r requirements.txt
-    База даних вже присутня у репозиторії, і суперкористувач для цієї бази це:
-        username: deadcorp
-        password: 111222333000qwa
     Можна створити свого суперкористувача за допомогою команди: python manage.py createsuperuser
     Далі потрібно налаштувати базу даних Redis.
         Для цього  у терміналі по черзі потрібно вписати наступні команди:
@@ -20,16 +17,52 @@
             І запустити саму базу даних командою: redis-server
     Далі потрібно запустити Сelery воркера для виконання поклажі в корзину у бекграунді: celery -A final worker -l info
 
-    Тепер можна запустити сервер Django командою: python manage.py runserver
+    Потрібно підключення бази даних MySql
+        Вона повинна бути встановлена у системі.
+        Якщо її немає - sudo apt-get install mysql-server mysql-client
+        Після налаштування потрібно зайти у консоль МуSql - mysql -u root -p
 
-    Тепер у браузері можна перейти по адресі http://127.0.0.1:8000/ в результаті відкриється сторінка Products на якій представлені усі продукти в базі даних.
+        Потім необхідно створити базу даних для проекту з назвою final(або іншою, тоді доведеться змінити назву у файлі конфігурації)
+            CREATE DATABASE final DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
+        Далі потрібно створити окремого користувача для цієї бази (ім'я та пароль можна змінити у файлі конфігурації)
+            CREATE USER 'final'@'localhost' IDENTIFIED BY Final123456789;
+            GRANT ALL PRIVILEGES ON 'someapp'.* TO 'django'@'localhost';
+            FLUSH PRIVILEGES;
+        Далі потрібні бібліотеки для роботи бази із Python:
+            sudo apt-get install python3-dev libmysqlclient-dev build-essential
+            та у віртуальному середовищі pip3.8 install mysqlclient
+        Тепер створити свого суперкористувача за допомогою команди: python manage.py createsuperuser
+        username: deadcorp
+        password: 111222333000qwa
+    Тепер потрібно створити файли міграції та засосувати їх
+        python manage.py makemigrations
+        python manage.py migrate
+    Налаштування uwsgi
+        у корні проетку у папці deploy є файл final_uwsgi.ini, де зберігаються налаштування uwsgi, та шляхи до потрібних файлів(потрібно змінити шляхи)
+    Далі для запуску потрібно встановити nginx
+        sudo apt-get install nginx
+        у корні проетку у папці deploy є файл final_nginx.conf з налаштуваннями nginx та шляхи до файлів(потрібно змінити шляхи)
+        потрібний файл uwsgi_params лежить у ції папці
+        далі потрібно створити посилнання на файл конфігурації
+            знаходячись у папці project/deploy
+            sudo ln -s final_nginx.conf /etc/nginx/sites-enabled/
+        далі потрібно забрати ститичні файли
+            python manage.py collectstatic
+        далі потрібно запустити nginx
+            sudo /etc/init.d/nginx start
+    Тепер для запуску django потрібно прописати команду
+        uwsgi --ini deploy/final_uwsgi.ini
+
+
+
+
+    Тепер у браузері можна перейти по адресі http://127.0.0.1/ в результаті відкриється сторінка Products на якій представлені усі продукти в базі даних.
     У кожного продукту є 3 кнопки:
         Кнопка Refresh product data - дозволяє обновити дані про продукт і отримати актуальну інформацію.
         Кнопка Product orders - перенаправляє користувача на сторінку, де він може переглянути усі його замовлення цього конкретного продукту,
             під кожним замовлення відображено статус замовлення, і по натисненню на статус користувача перенаправляє на сторінку де можна передивитися знімки зроблені під час замовлення.
-        Кнопка Add to cart - Після її натиснення користувачу видається модальне вікно, з інформацією про акаунт з яким він збирається зробити поклажу до корзини,
-            та пропонує змінити акаунт або продовжити поклажу з вибраним акаунтом, або відмінити поклажу.
-                При виборі варіанту зміни аккаунта, користувача перенаправляє на сторінку, де представлені усі акаунти, і після вибору потрібного акаунта,
+        Кнопка Add to cart - Після її натиснення користувачу видається модальне вікно, з інформацією про акаунти які можуть бути обрані для поклажі.
+                При виборі варіанту додати аккаунт, користувача перенаправляє на сторінку додавання акаунта, і після вибору потрібного акаунта,
                  користувачу потрібно самостійно повернутись до товару який він хотів замовити та повторити замовлення.
                 При продовженні поклажі, створюється замовлення і розпочинається процес поклажі в корзину, який невидно користувачеві.
                     Результат цього, та інших замовленнь користувач може переглянути натиснувши кнопку Product orders, біля відповідного товару.
@@ -45,10 +78,9 @@
 
         Сторінка Supplier accounts - на цій сторінці представлені усі акаунти поставщиків які можуть бути використані будь яким користувачем для поклажі товару у корзину.
             Акаунти посортовані по вкладках з назвою поставщика.
-            У звичайного користувача є можливість вибрати будь який акаунт, та додати акаунт.
-            Суперкористувач може також видаляти будь який акаунт.
-            Користувач може вибрати лише 1 акаунт для одного поставщика.
-                Вибраний акаунт буде відображатись першим у списку, та у нього буде неактивна клавіша вибору.
+            У звичайного користувача є можливість додати акаунт.
+            Через адмін панель можна видаляти будь який акаунт.
+            Користувач може вибрати акаунт для додавання в корзину при додаванні товару зі сторінки Products.
             По натисненню кнопки Add Supplier Account користувача перенаправляє на сторінку додавання акаунта, де потрібно вибрати поставщика та заповнити інші дані.
 
 Instruction EN
@@ -56,9 +88,6 @@ Instruction EN
     Create a virtual environment: python3.8 -m venv venv
     Activate it: source venv/bin/activate
     Install the necessary libraries: pip3.8 install -r requirements.txt
-    The database is already present in the repository, and the superuser for this database is:
-        username: deadcorp
-        password: 111222333000qwa
     You can create your superuser with the command: python manage.py createsuperuser
     Next you need to configure the database Redis.
         To do this, enter the following commands in turn in the terminal:
@@ -72,17 +101,50 @@ Instruction EN
 
             And run the database  a team: redis-server
     Next you need to run Сelery worker to carry luggage in the basket in the background: celery -A final worker -l info
-    You can now start the Django server with the command: python manage.py runserver
 
-    Now in the browser you can go to the address http://127.0.0.1:8000/ as a result, the Products page opens, which presents all the products in the database.
+    MySql database connection required
+        It must be installed in the system.
+        If it is not present - sudo apt-get install mysql-server mysql-client
+        After configuration, you need to go to the console MuSql - mysql -u root -p
+
+        Then you need to create a database for the project named final (or another, then you have to change the name in the configuration file below.)
+            CREATE DATABASE final DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
+        Next you need to create a separate user for this database (you can change the name and password in the configuration file below)
+            CREATE USER 'final' @ 'localhost' IDENTIFIED BY Final123456789;
+            GRANT ALL PRIVILEGES ON 'someapp'. * TO 'django' @ 'localhost';
+            FLUSH PRIVILEGES;
+        Next you need libraries to work with Python:
+            sudo apt-get install python3-dev libmysqlclient-dev build-essential
+        Now create your superuser with the command: python manage.py createsuperuser
+        username: deadcorp
+        password: 111222333000qwa
+    Now you need to create the migration files and suck them
+        python manage.py makemigrations
+        python manage.py migrate
+    Uwsgi settings
+        at the root of the project in the deploy folder there is a file final_uwsgi.ini, where the uwsgi settings are stored, and the paths to the desired files (you need to change the paths)
+    Next, you need to install nginx to run
+        sudo apt-get install nginx
+        in the root of the project in the deploy folder there is a file final_nginx.conf with nginx settings and paths to files (it is necessary to change ways)
+        the required uwsgi_params file is in this folder
+        then you need to create a link to the configuration file
+            being in the project/deploy folder
+            sudo ln -s final_nginx.conf /etc/nginx/sites-enabled /
+        then you need to pick up the static files
+            python manage.py collectstatic
+        then you need to run nginx
+            sudo /etc/init.d/nginx start
+    Now you need to write a command to run django
+        uwsgi --ini deploy/final_uwsgi.ini
+
+    Now in the browser you can go to the address http://127.0.0.1/  as a result, the Products page opens, which presents all the products in the database.
     Each product has 3 buttons:
         Refresh product data button - allows you to update product data and get up-to-date information.
         Product orders button - redirects the user to a page where he can view all his orders for this particular product,
             under each order the status of the order is displayed, and after clicking on the status of the user redirects to the page,
             where you can view the pictures taken during the order.
-        Add to cart button - After clicking it, the user is given a modal window with information about the account with which he is going to make luggage to the basket,
-             and offers to change the account or extend the baggage with the selected account, or cancel the baggage.
-             When selecting the option to change the account, the user is redirected to the page where all the accounts are presented, and after selecting the desired account,
+       Add to cart button - After clicking it, the user is given a modal window with information about the accounts that can be selected for luggage.
+                When selecting the option to add an account, the user is redirected to the page to add an account, and after selecting the desired account,
                   the user must return to the product he wanted to order and repeat the order.
              When the luggage is extended, an order is created and the baggage process begins in the basket, which is invisible to the user.
                  The user can view the result of this and other orders by clicking the Product orders button next to the corresponding product.
@@ -97,8 +159,7 @@ Instruction EN
 
         Supplier accounts page - this page presents all vendor accounts that can be used by any user to put the product in the cart.
           Accounts are sorted by tabs with the name of the supplier.
-            The average user has the ability to select any account and add an account.
-            The superuser can also delete any account.
-            The user can select only 1 account for one supplier.
-                The selected account will be displayed first in the list, and it will have an inactive selection key.
+            The average user has the ability to add an account.
+            The superuser can also delete any account in admin panel.
+            The user can select account for for place to cart when start place product on Products page.
            By clicking the Add Supplier Account button, the user is redirected to the account addition page, where you need to select a provider and fill in other data.

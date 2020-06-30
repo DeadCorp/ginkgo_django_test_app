@@ -14,7 +14,7 @@ class Product(models.Model):
     available = models.CharField(max_length=25, verbose_name='Availability', default='', blank=True)
     brand = models.CharField(max_length=25, verbose_name='Brand', default='', blank=True)
     available_count = models.CharField(max_length=10, verbose_name='Available count', default='', blank=True)
-    delivery_price = models.CharField(max_length=10, verbose_name='Delivery price', default='', blank=True)
+    delivery_price = models.CharField(max_length=25, verbose_name='Delivery price', default='', blank=True)
     variants_tag = models.CharField(max_length=100, verbose_name='Variants', default='', blank=True)
     img = models.CharField(max_length=100, verbose_name='Image', default='', blank=True)
     supplier = models.CharField(max_length=2, verbose_name='Supplier', default='', blank=True)

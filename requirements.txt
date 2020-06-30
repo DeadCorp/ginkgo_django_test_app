@@ -8,6 +8,8 @@ redis==3.5.3
 django-cleanup==5.0.0
 requests==2.23.0
 beautifulsoup4==4.9.1
+uWSGI==2.0.19.1
+mysqlclient==1.4.6
 
 
 

@@ -8,6 +8,7 @@ from selenium.common.exceptions import TimeoutException, ElementClickIntercepted
     ElementNotInteractableException
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 
 from order.autoplacers.Browser import Browser
@@ -281,6 +282,8 @@ class AutoPlacerSamsClub(Browser):
     def enter_quantity(self):
         self.log_info(f'Start enter quantity. Need set quantity to {self.count}')
         try:
+            self.wait.until(EC.visibility_of_element_located(
+                (By.CSS_SELECTOR, '.online.sc-cart-qty-button * input'))).send_keys(Keys.DELETE)
             self.wait.until(EC.visibility_of_element_located(
                 (By.CSS_SELECTOR, '.online.sc-cart-qty-button * input'))).send_keys(self.count)
             try:

@@ -40,7 +40,7 @@ class OrderStatus(models.Model):
 
 class OrderStatusImage(models.Model):
     order_status = models.ForeignKey(OrderStatus, on_delete=models.CASCADE, verbose_name='Order status', default=None)
-    status_image = models.ImageField(upload_to='status_image', null=True, blank=True)
+    status_image = models.ImageField(upload_to='status_image', max_length=300, null=True, blank=True)
     tag = models.CharField(max_length=100, verbose_name='Tag', default='', blank=True)
 
     def __str__(self):
