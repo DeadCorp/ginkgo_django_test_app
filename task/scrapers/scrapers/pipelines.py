@@ -77,7 +77,7 @@ class KmartProductPipeline(object):
             if item.get('price', UNKNOWN) != UNKNOWN:
                 if item['available']:
                     item['available'] = 'In availability'
-                    item['delivery_price'] = 'Free delivery' if int(item['price']) > 59 else '6.49'
+                    item['delivery_price'] = 'Free delivery' if int(item['price']) > 59 else '$6.49'
                 else:
                     item['available'] = 'Out of stock'
                     item['delivery_price'] = 'No delivery'
@@ -124,7 +124,7 @@ class SamsClubProductPipeline(object):
         item['available'] = 'Availability' if item.get('available') in ['inStoke', 'inStock', 'lowInStock'] else 'Out of stock'
         if not item.get('shipping'):
             item['shipping'] = True if item['available'] == 'Availability' else False
-        item['delivery_price'] = 'Free delivery' if item.get('delivery_price') == 0 else item.get('delivery_price')
+        item['delivery_price'] = 'Free delivery' if item.get('delivery_price') == 0 else '$' + str(item.get('delivery_price'))
 
         item.save()
         return item

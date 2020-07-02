@@ -1,3 +1,5 @@
+import json
+
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
@@ -26,7 +28,7 @@ def add_task(request):
         return redirect('product:products')
     else:
         form = TaskForm()
-        tasks = Task.objects.filter(user_id=request.user).order_by('-id')[:5]
+        tasks = Task.objects.filter(user_id=request.user).order_by('-id')[:15]
 
     suppliers = SupplierCodes.SUPPLIERS
     return render(request, 'task/add_task.html', {'form': form, 'tasks': tasks, 'suppliers': suppliers})
@@ -41,4 +43,15 @@ def delete_task(request):
             task.delete()
         except Task.DoesNotExist:
             pass
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+
+@login_required()
+def retry_task(request, pk):
+    try:
+        task = Task.objects.get(pk=pk)
+        task.data = ' '.join(json.loads(task.data))
+        task.save()
+    except Task.DoesNotExist:
+        pass
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
