@@ -271,13 +271,14 @@ class AutoPlacerSamsClub(Browser):
         for item in header:
             if 'item' in item.text.lower():
                 item_number = re.findall(r'\d+', item.text)
-                if int(item_number[0]) == int(self.option_id):
-                    self.log_info('Product on the page is correct')
-                    return self.product_status
-                else:
-                    self.log_err('Product on the page is incorrect')
-                    self.product_status = 'ADDING_PROBLEM'
-                    return None
+                if item_number:
+                    if int(item_number[0]) == int(self.option_id):
+                        self.log_info('Product on the page is correct')
+                        return self.product_status
+                    else:
+                        self.log_err('Product on the page is incorrect')
+                        self.product_status = 'ADDING_PROBLEM'
+                        return None
 
     def enter_quantity(self):
         self.log_info(f'Start enter quantity. Need set quantity to {self.count}')
