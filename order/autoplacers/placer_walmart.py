@@ -100,6 +100,7 @@ class AutoPlacerWalmart(Browser):
                         self.log_err(f'Product id in the cart: {item_id} not equal to order product id: {self.id_product}')
                         self.take_screenshot('cart_is_incorrect')
                         self.cart_status = 'WRONG_ITEM'
+                        self.product_status = 'WRONG_ITEM'
                     else:
                         self.log_info(f'Product id {item_id} in the cart correct')
 
@@ -155,14 +156,18 @@ class AutoPlacerWalmart(Browser):
 
     def __verify_product(self):
         time.sleep(0.5)
-        verify_product = self.browser.find_element(By.CSS_SELECTOR, 'meta[itemprop="sku"]')
-        product_id = verify_product.get_attribute('content')
-        if str(product_id) != str(self.id_product):
-            self.log_err(f'Incorrect product on the page: [{product_id}]')
+        try:
+            verify_product = self.browser.find_element(By.CSS_SELECTOR, 'meta[itemprop="sku"]')
+            product_id = verify_product.get_attribute('content')
+            if str(product_id) != str(self.id_product):
+                self.log_err(f'Incorrect product on the page: [{product_id}]')
+                self.product_status = 'ADDING_PROBLEM'
+                return self.product_status
+            else:
+                self.log_info(f'Product on the page is correct: [{product_id}]')
+        except NoSuchElementException:
             self.product_status = 'ADDING_PROBLEM'
             return self.product_status
-        else:
-            self.log_info(f'Product on the page is correct: [{product_id}]')
 
     def add_to_cart(self):
 
