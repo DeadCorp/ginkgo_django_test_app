@@ -12,12 +12,13 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 
 from order.autoplacers.Browser import Browser
+from order.autoplacers.captcha_solver import CaptchaSolver
 from order.models import Order
 from supplieraccount.models import SupplierAccount
 
 
 class AutoPlacerWalmart(Browser):
-    logging.basicConfig(level=logging.INFO, format='%(message)s')
+
 
     def __init__(self, **kwargs):
         super().__init__()
@@ -36,8 +37,8 @@ class AutoPlacerWalmart(Browser):
         self.qty = 0
         self.task_id = kwargs['celery_task_id']
 
-        self.log_info = lambda msg: logging.info(f'{self.task_id} {msg}')
-        self.log_err = lambda msg: logging.error(f'{self.task_id} {msg}')
+        self.log_info = lambda msg: self.logger.info(f'{self.task_id} {msg}')
+        self.log_err = lambda msg: self.logger.error(f'{self.task_id} {msg}')
 
         self.product_status = ''
         self.cart_status = ''
@@ -231,8 +232,9 @@ class AutoPlacerWalmart(Browser):
                     # return self.product_status, self.cart_status
 
         except TimeoutException:
-            self.log_err('Add to cart button not found, 99.9% product OOS')
+            self.log_err('Add to cart button not found, 50% product OOS')
             self.product_status = 'OOS'
+            self.take_screenshot('product_not_ready_to_adding')
             return self.product_status, self.cart_status
 
         return self.product_status, self.cart_status
@@ -391,7 +393,7 @@ class AutoPlacerWalmart(Browser):
             return False
         if not self.check_is_log_in():
             self.log_err("User wasn't logged in")
-            self.take_screenshot(f'user_was_not_login_try_left_{self.log_in_try-1}')
+            self.take_screenshot(f'user_was_not_login_try_left_{self.log_in_try}')
             self.retry_login()
 
     def check_is_log_in(self):
@@ -422,30 +424,10 @@ class AutoPlacerWalmart(Browser):
         captcha = self.browser.find_element(By.CSS_SELECTOR, '.g-recaptcha')
         data_callback = captcha.get_attribute('data-callback').strip()
         site_key = captcha.get_attribute('data-sitekey')
-        self.log_info('Do request to get answer id')
-        self.parameters_question_recaptcha['googlekey'] = site_key
-        self.parameters_question_recaptcha['pageurl'] = self.browser.current_url
+        captcha_solver = CaptchaSolver(self.logger, self.task_id)
+        answer = captcha_solver.solve(site_key, self.browser.current_url)
 
-        question_response = requests.get(self.send_question_url, params=self.parameters_question_recaptcha)
-        question_response = json.loads(question_response.text)
-
-        logging.info(f'Answer id {question_response["request"]}')
-        self.parameters_answer_recaptcha['id'] = int(question_response['request'])
-        time.sleep(15)
-
-        answer = self.captcha_not_ready
-        logging.info('Start check answer ready')
-        while answer == self.captcha_not_ready:
-            time.sleep(5)
-            answer_response = requests.get(self.take_answer_url, params=self.parameters_answer_recaptcha)
-            answer = json.loads(answer_response.text)['request']
-            logging.info(f'Answer {answer}')
-
-        if 'ERROR' in answer:
-            self.log_err('Problem with solve captcha')
-            self.retry_login()
-        else:
-            self.log_info('Take answer successful')
+        if answer:
             recaptcha = self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, '#g-recaptcha-response')))
             self.browser.execute_script(f"arguments[0].value='{answer}';", recaptcha)
             self.browser.execute_script(f"{data_callback}('{answer}');")
