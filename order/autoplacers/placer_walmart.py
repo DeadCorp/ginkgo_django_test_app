@@ -280,7 +280,8 @@ class AutoPlacerWalmart(Browser):
     def run(self):
         # if method bad_credentials in method login return True, method login return bool value else None
         # or if no need solve captcha and url after click not change, method login return bool value else None
-        if self.login() is None:
+        if self.login() is None and self.log_in_try != 0:
+
             self.get_main_page()
             self.log_info('Clear cart after login')
             self.clear_cart()
@@ -390,7 +391,7 @@ class AutoPlacerWalmart(Browser):
             return False
         if not self.check_is_log_in():
             self.log_err("User wasn't logged in")
-            self.take_screenshot(f'user_was_not_login_try_left_{self.log_in_try}')
+            self.take_screenshot(f'user_was_not_login_try_left_{self.log_in_try-1}')
             self.retry_login()
 
     def check_is_log_in(self):
@@ -452,8 +453,8 @@ class AutoPlacerWalmart(Browser):
 
     def retry_login(self):
         if self.log_in_try > 0:
-            self.log_info(f'Try logIn again {self.log_in_try} times left')
             self.log_in_try -= 1
+            self.log_info(f'Try logIn again {self.log_in_try} times left')
             self.login()
         else:
             self.log_err('Log In try ended')
