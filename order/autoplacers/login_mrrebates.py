@@ -30,7 +30,7 @@ class AutoLoginMrRebates(Browser):
 
     def check_login(self):
         top_bar_right = self.browser.find_element(By.CSS_SELECTOR, '.top-bar-right')
-        logout_button = top_bar_right.find_element(By.CSS_SELECTOR, '.logout-button')
+        logout_button = self.wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '.top-bar-right > .logout-button')), 'LogOut btn does not displayed!')
         if logout_button is not None:
             log_in_email = top_bar_right.text.replace(logout_button.text, '')
             if log_in_email.strip() == self.email.strip():
@@ -52,7 +52,9 @@ class AutoLoginMrRebates(Browser):
         logging.info('Start enter credentials')
         self.browser.find_element(By.CSS_SELECTOR, 'input[name="t_email_address"]').send_keys(self.email)
         self.browser.find_element(By.CSS_SELECTOR, 'input[name="t_password"]').send_keys(self.password)
+        current_url = self.browser.current_url
         self.browser.find_element(By.CSS_SELECTOR, '.row * > button[type="submit"]').click()
+        self.wait.until(EC.url_changes(current_url), 'Captcha does not applied!')
 
     def solve_captcha(self, site_key):
         parameters_question = {

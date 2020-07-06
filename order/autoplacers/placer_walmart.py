@@ -1,8 +1,10 @@
+import json
 import logging
 import os
 import re
 import time
 
+import requests
 from django.conf import settings
 from selenium.common.exceptions import TimeoutException, NoSuchElementException, ElementClickInterceptedException, \
     StaleElementReferenceException, ElementNotInteractableException
@@ -19,8 +21,8 @@ class AutoPlacerWalmart(Browser):
 
     def __init__(self, **kwargs):
         super().__init__()
-        self.product_cart_quantity = ''
-        self.product_cart_price = ''
+        self.product_cart_quantity = '0'
+        self.product_cart_price = '0'
         order = Order.objects.get(id=kwargs['order_instance_id'])
         account = SupplierAccount.objects.get(id=order.account.id)
 
@@ -42,6 +44,7 @@ class AutoPlacerWalmart(Browser):
 
         self.screenshot = f'Order_{self.task_id}_product_{order.product.sku}_'
         self.screenshot_dict = {}
+        self.login_status = False
 
     def get_cart(self):
         try:
@@ -97,7 +100,8 @@ class AutoPlacerWalmart(Browser):
                     self.log_info(cart_quantity_msg + ' - OK')
 
                     if item_id != self.id_product:
-                        self.log_err(f'Product id in the cart: {item_id} not equal to order product id: {self.id_product}')
+                        self.log_err(
+                            f'Product id in the cart: {item_id} not equal to order product id: {self.id_product}')
                         self.take_screenshot('cart_is_incorrect')
                         self.cart_status = 'WRONG_ITEM'
                     else:
@@ -129,14 +133,15 @@ class AutoPlacerWalmart(Browser):
             self.take_screenshot('cart_before_cleaning')
             self.browser.implicitly_wait(10)
             for i, item in enumerate(cart):
-                self.log_info(f'Deleting products. {len(cart)-i} of {len(cart)} products remaining')
+                self.log_info(f'Deleting products. {len(cart) - i} of {len(cart)} products remaining')
                 try:
                     remove_item = item.find_element(By.CSS_SELECTOR, "button[data-automation-id='cart-item-remove']")
                     remove_item.click()
 
                 except ElementClickInterceptedException:
                     try:
-                        remove_item = item.find_element(By.CSS_SELECTOR, "button[data-automation-id='cart-item-remove']")
+                        remove_item = item.find_element(By.CSS_SELECTOR,
+                                                        "button[data-automation-id='cart-item-remove']")
                         remove_item.click()
                     except ElementClickInterceptedException:
                         pass
@@ -272,11 +277,51 @@ class AutoPlacerWalmart(Browser):
         response = re.findall(r'\d*\.\d+|\d+', line)
         return response
 
+    def run(self):
+        # if method bad_credentials in method login return True, method login return bool value else None
+        # or if no need solve captcha and url after click not change, method login return bool value else None
+        if self.login() is None:
+            self.get_main_page()
+            self.log_info('Clear cart after login')
+            self.clear_cart()
+            if self.cart_status == 'EMPTY':
+
+                try:
+                    self.add_to_cart()
+
+                except (TimeoutException, StaleElementReferenceException, ElementNotInteractableException):
+                    self.log_err('Some exception when add to cart. Return status ADDING_PROBLEM')
+                    self.product_status = 'ADDING_PROBLEM'
+
+                if self.product_status == 'SUCCESS' and self.cart_status == 'SUCCESS':
+                    self.log_info(f'Order status: {self.product_status}. Close browser')
+
+                elif self.product_status == 'SUCCESS' and self.cart_status != 'SUCCESS' and self.cart_status != '':
+                    self.product_status = 'WRONG_ITEM'
+                    self.log_err(f'Order status: {self.product_status}. Close browser')
+
+                else:
+                    self.log_err(f'Order status: {self.product_status}. Close browser')
+
+            else:
+                self.log_err('Cart not empty after cleaning')
+        else:
+            self.product_status = 'ADDING_PROBLEM'
+        self.browser.quit()
+        return {
+            'quantity': self.product_cart_quantity,
+            'price': self.product_cart_price,
+            'screenshots': self.screenshot_dict,
+            'order_status': self.product_status,
+        }
+
     def to_login(self):
+        self.get_main_page()
         try:
             self.log_info('Start login process')
             time.sleep(1)
-            to_account = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[aria-label='Your Account']")))
+            to_account = self.wait.until(
+                EC.element_to_be_clickable((By.CSS_SELECTOR, "button[aria-label='Your Account']")))
             to_account.click()
             try:
                 time.sleep(0.5)
@@ -287,14 +332,15 @@ class AutoPlacerWalmart(Browser):
                 self.log_info('Open login page')
             except TimeoutException:
 
-                loginned_user = self.browser.find_element(By.CSS_SELECTOR, 'span[data-tl-id="header-account-menu-title"]')
+                loginned_user = self.browser.find_element(By.CSS_SELECTOR,
+                                                          'span[data-tl-id="header-account-menu-title"]')
                 self.log_err('Login process failed')
                 self.log_err(f'Already login user {loginned_user.get_attribute("text")}')
                 self.log_info('Do log out')
                 self.log_out()
         except TimeoutException:
             self.log_err("Didn't find account section ")
-            pass
+            self.retry_login()
 
     def log_out(self):
         try:
@@ -307,8 +353,18 @@ class AutoPlacerWalmart(Browser):
             self.log_info('Retry login process')
             self.to_login()
 
-    def login(self):
+    def bad_credentials(self):
+        self.log_info('Check credentials correcting')
+        try:
+            self.wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '#global-error')))
+            self.log_err('Incorrect credentials')
+            self.take_screenshot('incorrect_credentials')
+            return True
+        except TimeoutException:
+            return False
 
+    def login(self):
+        self.to_login()
         login = self.wait.until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, "form#sign-in-form > button[type='submit']")))
 
@@ -316,105 +372,88 @@ class AutoPlacerWalmart(Browser):
         self.browser.find_element(By.ID, "email").send_keys(self.supplier_email)
         self.browser.find_element(By.ID, "password").send_keys(self.supplier_password)
         self.log_info('Credentials entered, click SignIn button')
+        current_url = self.browser.current_url
         login.click()
         try:
-            time.sleep(5)
-            captcha = self.wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'div.captcha')))
+            self.wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '.g-recaptcha')))
             self.log_info('Need solve captcha')
-            self.take_screenshot('need_solve_captcha')
+            self.solve_captcha()
         except TimeoutException:
-            self.log_info('Maybe don`t need captcha')
+            try:
+                self.wait.until(EC.url_changes(current_url))
+                self.log_info('No need solve captcha')
+            except TimeoutException:
+                self.log_err('Problem with logIn')
+                self.take_screenshot('problem_with_login')
+                return False
+        if self.bad_credentials():
+            return False
+        if not self.check_is_log_in():
+            self.log_err("User wasn't logged in")
+            self.take_screenshot(f'user_was_not_login_try_left_{self.log_in_try}')
+            self.retry_login()
 
     def check_is_log_in(self):
         self.log_info('Check login status')
         self.get_main_page()
         try:
 
-            to_account = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[aria-label='Your Account']")))
+            to_account = self.wait.until(
+                EC.element_to_be_clickable((By.CSS_SELECTOR, "button[aria-label='Your Account']")))
             self.log_info('Open account section')
             to_account.click()
-            time.sleep(0.5)
+            time.sleep(1)
             try:
-                to_account_page = self.browser.find_element(By.CSS_SELECTOR, 'a[href="/account"]')
-                self.log_info('Open account page')
-                self.browser.execute_script("arguments[0].click();", to_account_page)
-
-                to_profile = self.browser.find_element(By.CSS_SELECTOR, 'a[href="/account/profile"]')
-                self.log_info('Open profile page')
-                self.browser.execute_script("arguments[0].click();", to_profile)
-
-                self.log_info('Search user email')
-                profile = self.browser.find_element(By.CSS_SELECTOR, 'p[data-automation-id="email-label"]')
-                email = profile.get_attribute('text')
-                if email == self.supplier_email:
-                    self.log_info(f'Successfully logged in: {self.supplier_email} / {self.supplier_password}')
-                    return True
-                else:
-                    return False
+                self.wait.until(
+                    EC.visibility_of_element_located((By.CSS_SELECTOR, "#vh-account-menu-root * [title='Sign Out']")))
+                self.log_info('Button logOut found. Login successful')
+                self.take_screenshot('successful_login')
+                self.login_status = True
+                return self.login_status
             except (TimeoutException, NoSuchElementException):
-                self.log_err('Can not get access to profile')
-
-                return False
-
+                self.log_err('Not found button logOut. Login failed')
+                return self.login_status
         except TimeoutException:
             self.log_err('Can not find account section')
-            return False
+            return self.login_status
 
-    def run(self):
-        self.get_main_page()
+    def solve_captcha(self):
+        captcha = self.browser.find_element(By.CSS_SELECTOR, '.g-recaptcha')
+        data_callback = captcha.get_attribute('data-callback').strip()
+        site_key = captcha.get_attribute('data-sitekey')
+        self.log_info('Do request to get answer id')
+        self.parameters_question_recaptcha['googlekey'] = site_key
+        self.parameters_question_recaptcha['pageurl'] = self.browser.current_url
 
-        # TODO will use it when got captcha
-        # self.__to_login()
-        # self.__login()
-        # is_login = self.__check_is_log_in()
-        #
-        # if not is_login:
-        #     self.log_err('User was not login ')
+        question_response = requests.get(self.send_question_url, params=self.parameters_question_recaptcha)
+        question_response = json.loads(question_response.text)
 
-        self.log_info('Clear cart after login --- Now without login --- need got captcha')
-        self.clear_cart()
+        logging.info(f'Answer id {question_response["request"]}')
+        self.parameters_answer_recaptcha['id'] = int(question_response['request'])
+        time.sleep(15)
 
-        if self.cart_status == 'EMPTY':
-            try:
-                self.add_to_cart()
-            except (TimeoutException, StaleElementReferenceException, ElementNotInteractableException):
-                self.log_err('Some exception when add to cart. Return status ADDING_PROBLEM')
-                self.browser.quit()
-                return {
-                    'quantity': self.product_cart_quantity,
-                    'price': self.product_cart_price,
-                    'order_status': 'ADDING_PROBLEM',
-                    'screenshots': self.screenshot_dict
-                }
+        answer = self.captcha_not_ready
+        logging.info('Start check answer ready')
+        while answer == self.captcha_not_ready:
+            time.sleep(5)
+            answer_response = requests.get(self.take_answer_url, params=self.parameters_answer_recaptcha)
+            answer = json.loads(answer_response.text)['request']
+            logging.info(f'Answer {answer}')
 
-            if self.product_status == 'SUCCESS' and self.cart_status == 'SUCCESS':
-                self.log_info(f'Order status: {self.product_status}. Close browser')
-                self.browser.quit()
-                return {
-                    'quantity': self.product_cart_quantity,
-                    'price': self.product_cart_price,
-                    'order_status': self.product_status,
-                    'screenshots': self.screenshot_dict
-                }
-            elif self.product_status == 'SUCCESS' and self.cart_status != 'SUCCESS' and self.cart_status != '':
-                self.product_status = 'WRONG_ITEM'
-                self.log_err(f'Order status: {self.product_status}. Close browser')
-                self.browser.quit()
-                return {
-                    'quantity': self.product_cart_quantity,
-                    'price': self.product_cart_price,
-                    'order_status': self.product_status,
-                    'screenshots': self.screenshot_dict
-                }
-            else:
-                self.log_err(f'Order status: {self.product_status}. Close browser')
-                self.browser.quit()
-                return {
-                    'quantity': self.product_cart_quantity,
-                    'price': self.product_cart_price,
-                    'order_status': self.product_status,
-                    'screenshots': self.screenshot_dict
-                }
+        if 'ERROR' in answer:
+            self.log_err('Problem with solve captcha')
+            self.retry_login()
         else:
-            self.browser.quit()
-            self.log_err('Cart not empty after cleaning')
+            self.log_info('Take answer successful')
+            recaptcha = self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, '#g-recaptcha-response')))
+            self.browser.execute_script(f"arguments[0].value='{answer}';", recaptcha)
+            self.browser.execute_script(f"{data_callback}('{answer}');")
+            time.sleep(10)
+
+    def retry_login(self):
+        if self.log_in_try > 0:
+            self.log_info(f'Try logIn again {self.log_in_try} times left')
+            self.log_in_try -= 1
+            self.login()
+        else:
+            self.log_err('Log In try ended')
