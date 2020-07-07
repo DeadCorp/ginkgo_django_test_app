@@ -2,8 +2,9 @@
 
 {% block title %} Add Task {% endblock %}
 
+
 {% block content %}
-    <form action="{% url 'task:add_task' %}" method="post" class="form-group">
+     <form action="{% url 'task:add_task' %}" method="post" class="form-group">
         {% csrf_token %}
         <input type="hidden" name="user_id" value="{{ request.user.id }}">
         <label for="sku">
@@ -46,7 +47,11 @@
                             </button>
                             <button class="btn btn-outline-primary float-right"
                                     formaction="{% url 'task:task_gen_csv' task.id %}"
-                                    type="submit">Gen to .csv file
+                                    type="submit">Generate csv file
+                            </button>
+                            <button class="btn btn-outline-primary float-right"
+                                    formaction="{% url 'task:task_gen_xls' task.id %}"
+                                    type="submit">Generate xls file
                             </button>
 
                                 {% if wrong %}

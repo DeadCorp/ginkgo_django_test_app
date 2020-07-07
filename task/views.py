@@ -7,10 +7,12 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, FileResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
+from openpyxl import Workbook
 
 from product.models import Product
 from supplieraccount.models import SupplierCodes
 from task.forms import TaskForm
+from task.generate_report_data import ReportData
 from task.models import Task
 
 
@@ -32,10 +34,14 @@ def add_task(request):
     else:
         form = TaskForm()
         tasks = Task.objects.filter(user_id=request.user).order_by('-id')
-    if request.META.get('wrong'):
-        wrong = request.META.get('wrong')
+    if request.META.get('task_error_id'):
+        wrong = {
+            'task_error_id': request.META.get('task_error_id'),
+            'error': '\n'.join(request.META.get('error')),
+        }
     else:
         wrong = ''
+
     suppliers = SupplierCodes.SUPPLIERS
     return render(request, 'task/add_task.html', {'form': form, 'tasks': tasks, 'suppliers': suppliers, 'wrong': wrong})
 
@@ -66,46 +72,62 @@ def retry_task(request, pk):
 @login_required()
 def task_gen_csv(request, pk):
     if request.method == 'POST':
-        task_instance = Task.objects.get(pk=pk)
-        task_data = json.loads(task_instance.data)
+        data_generator = ReportData(pk, request)
 
-        dir_name = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'media/scrapy_task_csv')
-        if not os.path.isdir(dir_name):
-            os.makedirs(dir_name)
-        file_name = f'Scrapy_task_{pk}_generated_{datetime.datetime.now()}.csv'
-
-        with open(os.path.join(dir_name, file_name), mode='w') as file:
-            field_names = ['SKU', 'Availability', 'Item price', 'Delivery price', 'Total price', 'Quantity']
+        path_to_file = data_generator.create_file_path('csv')
+        with open(path_to_file, mode='w') as file:
+            field_names = data_generator.field_names
             writer = csv.DictWriter(file, fieldnames=field_names)
             writer.writeheader()
-            for sku in task_data:
-                try:
-                    product = Product.objects.get(sku=sku)
-                except Product.DoesNotExist:
-                    wrong = {'task_error_id': task_instance.pk,
-                             'error': f'Product with SKU - {sku} dont exist in data base.\n'
-                                      f'Click to Retry task for get this product in data base.',
-                            }
-                    request.method = 'GET'
-                    request.META['wrong'] = wrong
-                    return add_task(request)
-                available = product.available if product.delivery_price != 'No delivery' else 'Out of stock'
-                to_write = {
-                    'SKU': product.sku,
-                    'Availability': available,
-                }
-                if available == 'Out of stock':
-                    to_write.update({key: 0 for key in field_names if key not in to_write.keys()})
-                else:
-                    delivery_price = product.delivery_price if product.delivery_price != 'Free delivery' else 0.00
-                    to_write.update({
-                        'Item price': product.price,
-                        'Delivery price': delivery_price,
-                        'Total price': round(float(product.price) + float(delivery_price), 2),
-                        'Quantity': product.available_count if product.available_count != 'is unknown' else 1,
-                    })
-                writer.writerow(to_write)
-        if os.path.exists(os.path.join(dir_name, file_name)):
-            response = FileResponse(open(os.path.join(dir_name, file_name), 'rb'))
+            for row in data_generator.generate():
+                writer.writerow(row)
+
+        if os.path.exists(path_to_file):
+            response = FileResponse(open(path_to_file, 'rb'))
             return response
+        # return check_generated_errors(data_generator)
+
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+
+@login_required()
+def task_gen_xls(request, pk):
+    if request.method == 'POST':
+        workbook = Workbook()
+        workbook.create_sheet(index=0, title='Sheet1')
+        work_sheet = workbook.active
+
+        data_generator = ReportData(pk, request)
+        field_names = data_generator.field_names
+
+        cell_range = work_sheet['A1:F1']
+        gen = (cell for row in cell_range for cell in row)
+        for x, cell in enumerate(gen):
+            cell.value = field_names[x]
+
+        path_to_file = data_generator.create_file_path('xls')
+
+        row_num_global = 1
+        data = data_generator.generate()
+
+        for product in data:
+            gen_cell = (work_sheet.cell(row=row_num + 1, column=col_num + 1) for row_num in range(row_num_global, len(data) + 1)
+                        for col_num in range(0, len(field_names)))
+            for x, cell in enumerate(gen_cell):
+                for i, item in enumerate(product):
+                    if i == x:
+                        cell.value = product[item]
+            row_num_global += 1
+
+        workbook.save(path_to_file)
+
+        if os.path.exists(path_to_file):
+            response = FileResponse(open(path_to_file, 'rb'))
+            return response
+        # return check_generated_errors(data_generator, path_to_file)
+
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+
+def check_generated_errors(data_generator):
+    return add_task(data_generator.take_request_with_errors())
