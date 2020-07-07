@@ -10,7 +10,7 @@ class Product(models.Model):
     price = models.CharField(max_length=50, verbose_name='Price', default='', blank=True)
     url = models.TextField(verbose_name='Url', default='', blank=True)
     category = models.TextField(verbose_name='Category', default='', blank=True)
-    rating = models.CharField(max_length=25, verbose_name='Rating', default='', blank=True)
+    rating = models.TextField(verbose_name='Rating', default='', blank=True)
     available = models.CharField(max_length=25, verbose_name='Availability', default='', blank=True)
     brand = models.TextField(verbose_name='Brand', default='', blank=True)
     available_count = models.CharField(max_length=25, verbose_name='Available count', default='', blank=True)
