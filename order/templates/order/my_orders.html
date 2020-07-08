@@ -2,10 +2,31 @@
 {% block title %} My orders {% endblock %}
 
 {% block content %}
-    {% for order in my_orders %}
-    {% empty %}
-            <h2 style="text-align: center">No orders</h2>
-    {% endfor %}
+
+    {% if my_orders %}
+    <form class="form-group" method="POST">
+        {% csrf_token %}
+        <label class="form-check-label">
+            Set q-ty to generate last orders
+            <input class="form-control-sm" type="number" value="1" min="1" max="{{ my_orders|length }}"
+                   id="orders_report_count" name="orders_report_qty">
+        </label>
+        {% with my_orders|first as first_order %}
+            <input type="hidden" value="{{ first_order.product.sku }}" name="report_product_sku">
+        {% endwith %}
+        <button class="btn btn-outline-primary float-right" style="margin: 0 10px 0 10px " type="submit" formaction="{% url 'order:order_gen_csv' %}">
+            Generate to csv
+        </button>
+        <button class="btn btn-outline-primary float-right" type="submit" formaction="{% url 'order:order_gen_xls' %}">
+            Generate to xls
+        </button>
+
+
+    </form>
+    {% else %}
+     <h2 style="text-align: center">No orders</h2>
+    {% endif %}
+
     <div class="row">
         {% for order in my_orders %}
             <div class="col-6">
@@ -18,32 +39,34 @@
                     {% else %}
                         <div class="card border-danger" style="margin: 5px">
                     {% endif %}
-                        <ul class="list-group list-group-flush" style="margin: 5px">
+                <ul class="list-group list-group-flush" style="margin: 5px">
 
-                            <li class="list-group-item"><b>Order id: </b>{{ order.order_id }}</li>
-                            <li class="list-group-item"><b>Product SKU: </b>{{ order.product }}</li>
-                            <li class="list-group-item"><b>Supplier account: </b>{{ order.account }}</li>
+                    <li class="list-group-item"><b>Order id: </b>{{ order.order_id }}</li>
+                    <li class="list-group-item"><b>Product SKU: </b>{{ order.product }}</li>
+                    <li class="list-group-item"><b>Supplier account: </b>{{ order.account }}</li>
 
-                            <li class="list-group-item"><b>Quantity: </b>{% if order.quantity %}{{ order.quantity }}{% else %}unknown{% endif %}</li>
+                    <li class="list-group-item"><b>Quantity: </b>{% if order.quantity %}{{ order.quantity }}{% else %}
+                        unknown{% endif %}</li>
 
-                            <li class="list-group-item"><b>Price: </b>{% if order.price %}{{ order.price }}{% else %}unknown{% endif %}</li>
+                    <li class="list-group-item"><b>Price: </b>{% if order.price %}{{ order.price }}{% else %}
+                        unknown{% endif %}</li>
 
-                            {% for statused in order.orderstatus_set.all %}
-                                {% if statused.status == 'SUCCESS' %}
-                                    <div class="alert alert-success"><a href="{% url 'order:order_status_image' statused.pk %}">
-                                        Order status: {{ statused.get_status_display }}</a></div>
-                                {% elif statused.status == 'IN_PROGRESS' %}
-                                    <div class="alert alert-secondary"><a
-                                            href="{% url 'order:order_status_image' statused.pk %}"> Order
-                                        status: {{ statused.get_status_display }}</a></div>
-                                {% else %}
-                                    <div class="alert alert-danger"><a href="{% url 'order:order_status_image' statused.pk %}">
-                                        Order status: {{ statused.get_status_display }}</a></div>
-                                {% endif %}
+                    {% for statused in order.orderstatus_set.all %}
+                        {% if statused.status == 'SUCCESS' %}
+                            <div class="alert alert-success"><a href="{% url 'order:order_status_image' statused.pk %}">
+                                Order status: {{ statused.get_status_display }}</a></div>
+                        {% elif statused.status == 'IN_PROGRESS' %}
+                            <div class="alert alert-secondary"><a
+                                    href="{% url 'order:order_status_image' statused.pk %}"> Order
+                                status: {{ statused.get_status_display }}</a></div>
+                        {% else %}
+                            <div class="alert alert-danger"><a href="{% url 'order:order_status_image' statused.pk %}">
+                                Order status: {{ statused.get_status_display }}</a></div>
+                        {% endif %}
 
-                            {% endfor %}
-                        </ul>
-                    </div>
+                    {% endfor %}
+                </ul>
+                </div>
                 {% else %}
                     <div class="card border-danger">
                         <div style="margin: 25px">
@@ -51,7 +74,8 @@
                             <div><b>Product SKU: </b>{{ order.product }}</div>
                             {% for statused in order.orderstatus_set.all %}
                                 {% if statused.status == None %}
-                                    <div class="alert alert-danger"><a href="{% url 'order:order_status_image' statused.pk %}">
+                                    <div class="alert alert-danger"><a
+                                            href="{% url 'order:order_status_image' statused.pk %}">
                                         Order Fail. Please try again</a></div>
 
                                 {% endif %}
@@ -67,4 +91,5 @@
 
 
         </div>
+
 {% endblock %}

@@ -38,8 +38,8 @@ class AutoPlacerSamsClub(Browser):
         self.product_id = order.product.product_id
         self.option_id = order.product.option_id
 
-        self.product_status = ''
-        self.cart_status = ''
+        self.product_status = '0'
+        self.cart_status = '0'
         self.task_id = kwargs['celery_task_id']
         self.log_info = lambda msg: logging.info(f'Order {self.task_id} {msg}')
         self.log_err = lambda msg: logging.error(f'Order {self.task_id} {msg}')

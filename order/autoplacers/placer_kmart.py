@@ -40,8 +40,8 @@ class AutoPlacerKmart(Browser):
         self.screenshot_dict = {}
 
         self.animate_style = None
-        self.product_cart_price = ''
-        self.product_cart_quantity = ''
+        self.product_cart_price = '0'
+        self.product_cart_quantity = '0'
 
     def parse_options(self):
         if self.options and self.options != 'is unknown':

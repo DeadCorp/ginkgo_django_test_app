@@ -40,8 +40,8 @@ class AutoPlacerWalmart(Browser):
         self.log_info = lambda msg: self.logger.info(f'{self.task_id} {msg}')
         self.log_err = lambda msg: self.logger.error(f'{self.task_id} {msg}')
 
-        self.product_status = ''
-        self.cart_status = ''
+        self.product_status = '0'
+        self.cart_status = '0'
 
         self.screenshot = f'Order_{self.task_id}_product_{order.product.sku}_'
         self.screenshot_dict = {}
