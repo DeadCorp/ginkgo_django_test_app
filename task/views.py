@@ -2,7 +2,7 @@ import json
 import os
 
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect, FileResponse
+from django.http import HttpResponseRedirect, FileResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 
@@ -105,3 +105,9 @@ def task_gen_xls(request, pk):
 
 def check_generated_errors(data_generator):
     return add_task(data_generator.take_request_with_errors())
+
+
+@login_required()
+def get_tasks_json(request):
+    return JsonResponse({'data': list(Task.objects.all().values())}, safe=False)
+

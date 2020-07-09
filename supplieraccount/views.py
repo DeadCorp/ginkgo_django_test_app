@@ -1,5 +1,7 @@
+import json
+
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect, render
 from django.views import generic
 
@@ -47,3 +49,9 @@ def add_supplier_account(request):
         else:
             form = SupplierAccountForm()
     return render(request, 'supplieraccount/add_supplier_account.html', {'form': form})
+
+
+@login_required()
+def get_suppliers_json(request):
+    return JsonResponse({'data': list(SupplierAccount.objects.all().values())}, safe=False)
+

@@ -4,7 +4,7 @@
 
 
 {% block content %}
-     <form action="{% url 'task:add_task' %}" method="post" class="form-group">
+    <form action="{% url 'task:add_task' %}" method="post" class="form-group">
         {% csrf_token %}
         <input type="hidden" name="user_id" value="{{ request.user.id }}">
         <label for="sku">
@@ -23,59 +23,72 @@
     {% if tasks %}
         <h3 style="text-align: center">Last tasks</h3>
     {% endif %}
-    <div class="row">
-        {% for task in tasks %}
-            <div class="col-sm-12">
-                <div class="card border border-success" style="margin: 0 -10px 10px -10px ; padding: 2% ">
+    <form method="POST">
+        {% csrf_token %}
+        <table id="tasks_table" class="table table-bordered">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Description</th>
+                <th>CSV</th>
+                <th>XLS</th>
+            </tr>
+            </thead>
+{#            <tbody>#}
+{##}
+{#            {% for task in tasks %}#}
+{#                <tr>#}
+{#                    <td>{{ task.id }}</td>#}
+{#                    <td>{{ task.description }}</td>#}
+{#                    <td>#}
+{#                        <button id="task_csv" class="btn btn-outline-primary float-right" style="margin: 0 10px 0 10px;"#}
+{#                                formaction="{% url 'task:task_gen_csv' task.id %}" type="submit">Generate csv file#}
+{#                        </button>#}
+{#                    </td>#}
+{#                    <td>#}
+{#                        <button class="btn btn-outline-primary float-right"#}
+{#                                formaction="{% url 'task:task_gen_xls' task.id %}"#}
+{#                                type="submit">Generate xls file#}
+{#                        </button>#}
+{#                    </td>#}
+{#                </tr>#}
+{#            {% endfor %}#}
+{##}
+{#            </tbody>#}
+        </table>
+    </form>
 
-                    <a name="{{ task.id }}"><b>Task id :</b> {{ task.id }}</a>
-                    {% if task.description != '' %}<span><b>    {{ task.description }}</b></span>{% endif %}
-                    <span><b>Products SKU : </b>{{ task.data }}</span>
-                    <form method="POST">
-                        {% csrf_token %}
-                        <input type="hidden" name="task_id" value={{ task.id }}>
-                        {% if task.description == 'In progress...' %}
-                            <button class="btn btn-danger" formaction="{% url 'task:delete_task' %}" type="submit"
-                                    disabled>Delete
-                            </button>
-                        {% else %}
-                            <button class="btn btn-info" formaction="{% url 'task:retry_task' task.id %}" type="submit">
-                                Retry task
-                            </button>
-                            <button class="btn btn-danger" formaction="{% url 'task:delete_task' %}" type="submit">
-                                Delete
-                            </button>
-                            <button class="btn btn-outline-primary float-right"
-                                    style="margin: 0 10px 0 10px;"
-                                    formaction="{% url 'task:task_gen_csv' task.id %}"
-                                    type="submit">Generate csv file
-                            </button>
-                            <button class="btn btn-outline-primary float-right"
-                                    formaction="{% url 'task:task_gen_xls' task.id %}"
-                                    type="submit">Generate xls file
-                            </button>
+    <script>
+        $(document).ready(function () {
 
-                                {% if wrong %}
+            var myData = [];
+            {% for task in tasks %}
+                    myData.push([
+                        "{{ task.id}}",
+                        "{{task.description}}",
+                        "<button id='task_csv' class='btn btn-outline-primary float-right' style='margin: 0 10px 0 10px;' formaction='{% url 'task:task_gen_csv' task.id %}' type='submit'>Generate csv file</button>",
+                        "<button id='task_csv' class='btn btn-outline-primary float-right' style='margin: 0 10px 0 10px;' formaction='{% url 'task:task_gen_xls' task.id %}' type='submit'>Generate xls file</button>"
+                    ]);
+            {% endfor %}
 
-                                    {%  if wrong.task_error_id == task.id %}
+            $('#tasks_table').DataTable({
+                "order": [[0, "desc"]],
+                "pageLength": 25,
+                "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "All"] ],
+                "data": myData
 
-                                    <script type='text/javascript'>
-                                    $(document).ready(function(){
-                                    window.location = '#{{ task.id }}'
-                                    });
-                                    </script>
 
-                                         <div class="border-top" style="margin: 15px 0 0 0">
-                                         <h5 style="color: crimson">{{ wrong.error|linebreaks }}</h5>
-                                         </div>
-                                    {% endif %}
-                                {% endif %}
+                {#"ajax": "{% url 'task:get_tasks_json' %}",#}
+                {#"columns": [#}
+                {#    {"data": "id"},#}
+                {#    {"data": "description"},#}
+                {##}
+                {#{"data": null,#}
+                {#    "defaultContent": },#}
+                {#{"data": null, "defaultContent": "<button class='btn btn-outline-primary float-right' formaction='{% url 'task:task_gen_xls' my_data[0] %}'type='submit'>Generate xls file</button>"}#}
+                {#],#}
+            });
+        });
+    </script>
 
-                        {% endif %}
-
-                    </form>
-                </div>
-            </div>
-        {% endfor %}
-    </div>
 {% endblock %}

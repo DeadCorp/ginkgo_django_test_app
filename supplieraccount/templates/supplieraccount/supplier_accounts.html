@@ -3,37 +3,34 @@
 {% block title %} Suppliers {% endblock %}
 
 {% block content %}
-    <a class="btn btn-primary" href="{% url 'supplier_account:add_supplier_account' %}?next={{ request.path }}">Add
+ <a class="btn btn-primary" href="{% url 'supplier_account:add_supplier_account' %}?next={{ request.path }}">Add
         Supplier Account</a>
-    <ul class="nav nav-tabs" style="margin: 30px 0px 0px 0px" id="myTab" role="tablist">
-        {% for supplier_code, supplier_name in suppliers.items %}
-            <li class="nav-item">
-                <a {% if forloop.first %}class="nav-link active" {% else %}class="nav-link"{% endif %}
-                   id="{{ supplier_name }}-tab" data-toggle="tab" href="#{{ supplier_name }}" role="tab"
-                   aria-controls="{{ supplier_name }}" aria-selected="true">{{ supplier_name }}</a>
-            </li>
-        {% endfor %}
-    </ul>
-    <div class="tab-content" id="myTabContent">
-        {% for supplier_code, supplier_name in suppliers.items %}
-            <div {% if forloop.first %}class="tab-pane fade show active"{% else %} class="tab-pane fade"{% endif %}
-                 id="{{ supplier_name }}" role="tabpanel" aria-labelledby="{{ supplier_name }}-tab">
-                <div class="card border-success " style="padding: 1%">
-                    <div class="row">
-                        {% for account_supplier_code, account_list in accounts.items %}
-                            {% if account_supplier_code == supplier_code %}
-                                {% for account in account_list %}
-                                    {% include 'supplieraccount/supplier_accounts_generic.html' %}
-                                {% empty %}
-                                     <div class="custom-control" style="padding: 1%">No accounts for this supplier</div>
-                                {% endfor %}
-                            {% endif %}
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-        {% endfor %}
+    <div class="card border-success " style="padding: 1%;margin: 1% 0 0 0">
+        <table id="supplier_account_table" class="table table-bordered">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Password</th>
+                <th>Supplier</th>
+            </tr>
+            </thead>
+        </table>
     </div>
+    <script>
+        $(document).ready(function () {
 
-
+            $('#supplier_account_table').DataTable({
+                "ajax": "{% url 'supplier_account:get_suppliers_json' %}",
+                "columns": [
+                    {"data": "id"},
+                    {"data": "username"},
+                    {"data": "email"},
+                    {"data": "password"},
+                    {"data": "supplier"},
+                ],
+            });
+        });
+    </script>
 {% endblock %}

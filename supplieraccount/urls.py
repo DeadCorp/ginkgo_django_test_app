@@ -7,4 +7,5 @@ app_name = 'supplier_account'
 urlpatterns = [
     path('', login_required(views.SupplierAccountView.as_view()), name='supplier_accounts'),
     path('add_supplier_account/', views.add_supplier_account, name='add_supplier_account'),
+    path('get_suppliers_json/', views.get_suppliers_json, name='get_suppliers_json'),
 ]

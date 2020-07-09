@@ -10,4 +10,5 @@ urlpatterns = [
     path('retry_task/<str:pk>', views.retry_task, name='retry_task'),
     path('task_gen_csv/<str:pk>', views.task_gen_csv, name='task_gen_csv'),
     path('task_gen_xls/<str:pk>', views.task_gen_xls, name='task_gen_xls'),
+    path('get_tasks_json/', views.get_tasks_json, name='get_tasks_json'),
 ]
