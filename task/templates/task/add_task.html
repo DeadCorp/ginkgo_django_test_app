@@ -30,6 +30,7 @@
             <tr>
                 <th>ID</th>
                 <th>Description</th>
+                <th>Retry</th>
                 <th>CSV</th>
                 <th>XLS</th>
             </tr>
@@ -66,8 +67,11 @@
                     myData.push([
                         "{{ task.id}}",
                         "{{task.description}}",
-                        "<button id='task_csv' class='btn btn-outline-primary float-right' style='margin: 0 10px 0 10px;' formaction='{% url 'task:task_gen_csv' task.id %}' type='submit'>Generate csv file</button>",
-                        "<button id='task_csv' class='btn btn-outline-primary float-right' style='margin: 0 10px 0 10px;' formaction='{% url 'task:task_gen_xls' task.id %}' type='submit'>Generate xls file</button>"
+                        "<button class=\"btn btn-sm btn-outline-info\" formaction=\"{% url 'task:retry_task' task.id %}\" type=\"submit\">\n" +
+                        "                                Retry task\n" +
+                        "                            </button>",
+                        "<button id='task_csv' class='btn btn-sm btn-outline-primary float-right' style='margin: 0 10px 0 10px;' formaction='{% url 'task:task_gen_csv' task.id %}' type='submit'>Generate csv file</button>",
+                        "<button id='task_csv' class='btn btn-sm btn-outline-primary float-right' style='margin: 0 10px 0 10px;' formaction='{% url 'task:task_gen_xls' task.id %}' type='submit'>Generate xls file</button>"
                     ]);
             {% endfor %}
 
