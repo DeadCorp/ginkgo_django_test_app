@@ -44,8 +44,8 @@ def add_to_cart(request):
 
 @login_required()
 def display_my_orders(request, product_sku):
-    my_orders = Order.objects.filter(user=request.user, product__sku=product_sku).order_by('-pk')
-    return render(request, 'order/my_orders.html', {'my_orders': my_orders})
+    # my_orders = Order.objects.filter(user=request.user, product__sku=product_sku).order_by('-pk')
+    return render(request, 'order/my_orders.html')  # , {'my_orders': my_orders})
 
 
 class StatusImageView(generic.DetailView):

@@ -19,10 +19,8 @@
         </label>
         <textarea id="sku" style="width: 100%; height: 300px" class="form-control" name="data"></textarea>
         <button style="margin: 10px" type="submit" class="btn btn-primary">Start search</button>
+
     </form>
-    {% if tasks %}
-        <h3 style="text-align: center">Last tasks</h3>
-    {% endif %}
     <form method="POST">
         {% csrf_token %}
         <table id="tasks_table" class="table table-bordered">
@@ -35,63 +33,46 @@
                 <th>XLS</th>
             </tr>
             </thead>
-{#            <tbody>#}
-{##}
-{#            {% for task in tasks %}#}
-{#                <tr>#}
-{#                    <td>{{ task.id }}</td>#}
-{#                    <td>{{ task.description }}</td>#}
-{#                    <td>#}
-{#                        <button id="task_csv" class="btn btn-outline-primary float-right" style="margin: 0 10px 0 10px;"#}
-{#                                formaction="{% url 'task:task_gen_csv' task.id %}" type="submit">Generate csv file#}
-{#                        </button>#}
-{#                    </td>#}
-{#                    <td>#}
-{#                        <button class="btn btn-outline-primary float-right"#}
-{#                                formaction="{% url 'task:task_gen_xls' task.id %}"#}
-{#                                type="submit">Generate xls file#}
-{#                        </button>#}
-{#                    </td>#}
-{#                </tr>#}
-{#            {% endfor %}#}
-{##}
-{#            </tbody>#}
+
         </table>
     </form>
 
     <script>
         $(document).ready(function () {
 
-            var myData = [];
-            {% for task in tasks %}
-                    myData.push([
-                        "{{ task.id}}",
-                        "{{task.description}}",
-                        "<button class=\"btn btn-sm btn-outline-info\" formaction=\"{% url 'task:retry_task' task.id %}\" type=\"submit\">\n" +
-                        "                                Retry task\n" +
-                        "                            </button>",
-                        "<button id='task_csv' class='btn btn-sm btn-outline-primary float-right' style='margin: 0 10px 0 10px;' formaction='{% url 'task:task_gen_csv' task.id %}' type='submit'>Generate csv file</button>",
-                        "<button id='task_csv' class='btn btn-sm btn-outline-primary float-right' style='margin: 0 10px 0 10px;' formaction='{% url 'task:task_gen_xls' task.id %}' type='submit'>Generate xls file</button>"
-                    ]);
-            {% endfor %}
-
             $('#tasks_table').DataTable({
                 "order": [[0, "desc"]],
-                "pageLength": 25,
-                "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "All"] ],
-                "data": myData
+                'serverSide': true,
+                'ajax': '/api/tasks/?format=datatables&username={{ request.user }}',
 
+                'columns': [
+                    {'data': 'pk'},
+                    {'data': 'description'},
+                    {
+                        'data': null,
+                        "render": function (data, type, row, meta) {
+                            let url_mask = "{% url 'task:retry_task' pk='tasks_retry_url_mask' %}".replace(/tasks_retry_url_mask/, data.pk.toString());
+                            return '<button class="btn btn-sm btn-outline-info" formaction="' + url_mask + '"  type="submit">Retry task</button>';
+                        }
+                    },
+                    {
+                        'data': null,
+                        "render": function (data, type, row, meta) {
+                            let url_mask = "{% url 'task:task_gen_csv' pk='tasks_csv_url_mask' %}".replace(/tasks_csv_url_mask/, data.pk.toString());
+                            return '<button class="btn btn-sm btn-outline-primary" formaction="' + url_mask + '"  type="submit">Generate csv file</button>';
+                        }
+                    },
+                    {
+                        'data': null,
+                        "render": function (data, type, row, meta) {
+                            let url_mask = "{% url 'task:task_gen_xls' pk='tasks_xls_url_mask' %}".replace(/tasks_xls_url_mask/, data.pk.toString());
+                            return '<button class="btn btn-sm btn-outline-primary" formaction="' + url_mask + '"  type="submit">Generate xls file</button>';
+                        }
+                    },
+                ]
 
-                {#"ajax": "{% url 'task:get_tasks_json' %}",#}
-                {#"columns": [#}
-                {#    {"data": "id"},#}
-                {#    {"data": "description"},#}
-                {##}
-                {#{"data": null,#}
-                {#    "defaultContent": },#}
-                {#{"data": null, "defaultContent": "<button class='btn btn-outline-primary float-right' formaction='{% url 'task:task_gen_xls' my_data[0] %}'type='submit'>Generate xls file</button>"}#}
-                {#],#}
             });
+
         });
     </script>
 

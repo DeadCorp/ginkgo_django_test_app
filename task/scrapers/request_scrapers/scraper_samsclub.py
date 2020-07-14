@@ -45,7 +45,7 @@ class SamsClubScraper(object):
             'option_id': '',
             'name': '',
             'price': '',
-            'url': '',
+            'product_url': '',
             'category': '',
             'rating': '',
             'available': '',
@@ -163,10 +163,10 @@ class SamsClubScraper(object):
             self.item['product_id'] = product['id']
             self.item['option_id'] = product['option']
             self.item['supplier'] = product['supplier']
-            self.item['url'] = urljoin(self.SAMS_CLUB_URL, payload.get('seoUrl', self.UNKNOWN))
+            self.item['product_url'] = urljoin(self.SAMS_CLUB_URL, payload.get('seoUrl', self.UNKNOWN))
 
     def take_category(self):
-        product_page_response = self.session.get(self.item['url'])
+        product_page_response = self.session.get(self.item['product_url'])
         soup = BeautifulSoup(product_page_response.text, 'html.parser')
         categories = soup.select('ol.sc-breadcrumbs > li')
         category = [category.text for category in categories]

@@ -8,7 +8,7 @@ class ProductAdmin(admin.ModelAdmin):
     ordering = ['sku']
 
     fields = ['sku', 'product_id', 'option_id', 'name', ('price', 'delivery_price'),
-              'is_variant', 'variants_tag', ('brand', 'model', 'rating'), 'url',
+              'is_variant', 'variants_tag', ('brand', 'model', 'rating'), 'product_url',
               'description', 'category', ('available', 'available_count'),
               'img', 'supplier', 'delivery', 'shipping', 'store_pickup'
               ]

@@ -20,11 +20,13 @@
     </div>
     <script>
         $(document).ready(function () {
-
             $('#supplier_account_table').DataTable({
-                "ajax": "{% url 'supplier_account:get_suppliers_json' %}",
+                "order": [[4, "asc"]],
+                'serverSide': true,
+
+                'ajax': '/api/supplier_accounts/?format=datatables',
                 "columns": [
-                    {"data": "id"},
+                    {"data": "pk"},
                     {"data": "username"},
                     {"data": "email"},
                     {"data": "password"},

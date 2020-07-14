@@ -22,7 +22,7 @@ class AutoPlacerKmart(Browser):
         order = Order.objects.get(id=kwargs['order_instance_id'])
         account = SupplierAccount.objects.get(id=order.account.id)
 
-        self.product_url = order.product.url
+        self.product_url = order.product.product_url
         self.options = order.product.variants_tag
         self.parse_options()
         self.count = kwargs['count']
@@ -172,7 +172,7 @@ class AutoPlacerKmart(Browser):
             self.wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '#rightrail')))
             quantity = self.wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'input[name="quantity"]')))
         except TimeoutException:
-            quantity = self.wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'input[name="quantity"]')))
+             quantity = self.wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'input[name="quantity"]')))
         quantity_value = quantity.get_attribute('value')
         difference = int(self.count) - int(quantity_value)
 

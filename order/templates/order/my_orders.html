@@ -3,83 +3,79 @@
 
 {% block content %}
 
-    {% if my_orders %}
+    <div id="orders_buttons">
         <form class="form-group" method="POST">
             {% csrf_token %}
             <label class="form-check-label">
                 Set q-ty to generate last orders
-                <input class="form-control-sm" type="number" value="1" min="1" max="{{ my_orders|length }}"
+                <input class="form-control-sm" type="number" value="1" min="1"
                        id="orders_report_count" name="orders_report_qty">
             </label>
-            {% with my_orders|first as first_order %}
-                <input type="hidden" value="{{ first_order.product.sku }}" name="report_product_sku">
-            {% endwith %}
-            <button class="btn btn-outline-primary float-right" style="margin: 0 10px 0 10px " type="submit"
+            <input id="report_product_sku" type="hidden" value="" name="report_product_sku">
+            <button id="order_gen_csv" class="btn btn-outline-primary float-right" style="margin: 0 10px 0 10px "
+                    type="submit"
                     formaction="{% url 'order:order_gen_csv' %}">
                 Generate to csv
             </button>
-            <button class="btn btn-outline-primary float-right" type="submit"
+            <button id="order_gen_xls" class="btn btn-outline-primary float-right" type="submit"
                     formaction="{% url 'order:order_gen_xls' %}">
                 Generate to xls
             </button>
-
-
         </form>
+    </div>
+    <table id="orders_table" class="table table-bordered ">
+        <thead>
+        <tr>
+            <th>Order id</th>
+            <th>SKU</th>
+            <th>Account username</th>
+            <th>Account email</th>
+            <th>Cart price</th>
+            <th>Cart quantity</th>
+            <th>Status</th>
 
-        <table id="orders_table" class="table table-bordered ">
-            <thead>
-            <tr>
-                <th>Order id</th>
-                <th>SKU</th>
-                <th>Account username</th>
-                <th>Account email</th>
-                <th>Cart price</th>
-                <th>Cart quantity</th>
-                <th>Status</th>
-
-            </tr>
-            </thead>
-        </table>
-
-    {% else %}
-        <h2 style="text-align: center">No orders</h2>
-    {% endif %}
+        </tr>
+        </thead>
+    </table>
 
     <script>
         $(document).ready(function () {
-
-            var data = []
-            {% for order in my_orders %}
-                data.push([
-                    "{{ order.order_id }}",
-                    "{{ order.product.sku }}",
-                    "{{ order.account.username }}",
-                    "{{ order.account.email }}",
-                    "{{ order.price }}",
-                    "{{ order.quantity }}",
-                    {% with order.orderstatus_set.all|first as statusd %}
-                        "<div class='alert'><a href='{% url 'order:order_status_image' statusd.pk %}'>{{ statusd.status }}</a></div>",
-                    {% endwith %}
-
-                ])
-            {% endfor %}
-
-            $('#orders_table').DataTable(
+            var table = $('#orders_table').DataTable(
                 {
-                    "order": [[0, "desc"]],
-                    "pageLength": 25,
-                    "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
-                    "data": data,
-                    "createdRow": function (row, data, index) {
-                        if (data[6].indexOf('SUCCESS') !== -1) {
-                            $('td', row).addClass('alert-success');
-                        } else if (data[6].indexOf('IN_PROGRESS') !== -1) {
-                            $('td', row).addClass('alert-secondary');
-                        } else {
-                            $('td', row).addClass('alert-danger');
-                        }
-                    }
-                });
+                    'serverSide': true,
+                    'ajax': '/api/orderstatus/?format=datatables&username={{request.user}}&sku={{request.path|urlencode}}',
+
+                    "columns": [
+                        {"data": "order.order_id"},
+                        {"data": 'order.product'},
+                        {"data": "order.account.username"},
+                        {"data": "order.account.email"},
+                        {"data": "order.price"},
+                        {"data": "order.quantity"},
+                        {
+                            "data": null,
+                            "render": function (data, type, row, meta) {
+
+
+                                document.querySelector("#report_product_sku").setAttribute('value', data.order.product);
+                                let url_mask = "{% url 'order:order_status_image' pk=123 %}".replace(/123/, data.pk)
+
+                                {% comment %}
+                                if (data.status.indexOf('SUCCESS') !== -1) {
+                                    $('td', row).addClass('alert-success');
+                                } else if (data.status.indexOf('IN_PROGRESS') !== -1) {
+                                    $('td', row).addClass('alert-secondary');
+                                } else {
+                                    $('td', row).addClass('alert-danger');
+                                }
+                                {% endcomment %}
+                                return '<div class="alert"><a href="' + url_mask + '">' + data.status + '</a></div>';
+                            }
+                        },
+                    ],
+                }
+            );
+
         });
     </script>
 

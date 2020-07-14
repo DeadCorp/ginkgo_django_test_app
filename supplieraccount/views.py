@@ -9,24 +9,27 @@ from supplieraccount.forms import SupplierAccountForm
 from supplieraccount.models import SupplierAccount, SupplierCodes
 
 
-class SupplierAccountView(generic.ListView):
-    model = SupplierAccount
-    context_object_name = 'accounts'
-    template_name = 'supplieraccount/supplier_accounts.html'
+# class SupplierAccountView(generic.ListView):
+#     model = SupplierAccount
+#     context_object_name = 'accounts'
+#     template_name = 'supplieraccount/supplier_accounts.html'
+#
+#     def get_context_data(self, *, object_list=None, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         # get dictionary with suppliers to sort accounts of suppliers by supplier code
+#         suppliers = SupplierCodes.SUPPLIERS
+#         context['accounts'] = self.sort_supplier_account_by_suppliers(suppliers)
+#         return context
+#
+#     @staticmethod
+#     def sort_supplier_account_by_suppliers(suppliers):
+#         # Return dictionary where:
+#         # key is the Suppliers code
+#         # value is the queryset  with all suppliers accounts
+#         return {supplier_code: SupplierAccount.objects.filter(supplier=supplier_code) for supplier_code in suppliers}
 
-    def get_context_data(self, *, object_list=None, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # get dictionary with suppliers to sort accounts of suppliers by supplier code
-        suppliers = SupplierCodes.SUPPLIERS
-        context['accounts'] = self.sort_supplier_account_by_suppliers(suppliers)
-        return context
-
-    @staticmethod
-    def sort_supplier_account_by_suppliers(suppliers):
-        # Return dictionary where:
-        # key is the Suppliers code
-        # value is the queryset  with all suppliers accounts
-        return {supplier_code: SupplierAccount.objects.filter(supplier=supplier_code) for supplier_code in suppliers}
+def supplier_accounts(request):
+    return render(request, 'supplieraccount/supplier_accounts.html')
 
 
 @login_required()
@@ -50,8 +53,4 @@ def add_supplier_account(request):
             form = SupplierAccountForm()
     return render(request, 'supplieraccount/add_supplier_account.html', {'form': form})
 
-
-@login_required()
-def get_suppliers_json(request):
-    return JsonResponse({'data': list(SupplierAccount.objects.all().values())}, safe=False)
 

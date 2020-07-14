@@ -129,13 +129,13 @@ class SamsClubSpider(scrapy.Spider):
                     item['shipping'] = False
                     item['store_pickup'] = True
                     item['delivery_price'] = 'No delivery'
-            item['url'] = urljoin(self.SAMS_CLUB_URL, payload.get('seoUrl', self.UNKNOWN))
+            item['product_url'] = urljoin(self.SAMS_CLUB_URL, payload.get('seoUrl', self.UNKNOWN))
 
             sku_options = payload.get('skuOptions') or []
             item = self.take_option_data(sku_options, item)
 
             yield scrapy.Request(
-                url=item['url'],
+                url=item['product_url'],
                 callback=self.take_category,
                 meta={'item': item}
             )

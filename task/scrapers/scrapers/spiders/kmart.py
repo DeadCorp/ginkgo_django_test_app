@@ -220,7 +220,7 @@ class KmartSpider(scrapy.Spider):
 
     def parse_product(self, response):
         item = response.meta.get('item')
-        item['url'] = urljoin(self.KMART_URL, f'-/p-{item["product_id"]}')
+        item['product_url'] = urljoin(self.KMART_URL, f'-/p-{item["product_id"]}')
         self.logger.info(f'Parse product - response {response}')
         data_json = json.loads(response.body)
 
