@@ -21,6 +21,8 @@ class ProductViewSet(viewsets.ModelViewSet):
 class TaskViewSet(viewsets.ModelViewSet):
 
     serializer_class = TaskSerializer
+    search_fields = ['id']
+    ordering_fields = ['pk']
 
     def get_queryset(self):
         queryset = Task.objects.all()
@@ -32,12 +34,15 @@ class TaskViewSet(viewsets.ModelViewSet):
 
 
 class SupplierAccountsViewSet(viewsets.ModelViewSet):
+    search_fields = ['username', 'email']
+    ordering_fields = ['pk', 'supplier', 'username', 'email']
     queryset = SupplierAccount.objects.all().order_by('-supplier')
     serializer_class = SupplierAccountsSerializer
 
 
 class OrderViewSet(viewsets.ModelViewSet):
     serializer_class = OrderSerializer
+
 
     def get_queryset(self):
         queryset = Order.objects.all()
@@ -70,6 +75,9 @@ class GroupViewSet(viewsets.ModelViewSet):
 
 class StatusViewSet(viewsets.ModelViewSet):
     serializer_class = StatusSerializer
+
+    search_fields = ['order_id', ]
+    ordering_fields = ['order_id', 'account.username', 'account.email', 'price']
 
     def get_queryset(self):
         queryset = OrderStatus.objects.all()

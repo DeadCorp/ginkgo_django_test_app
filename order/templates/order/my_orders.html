@@ -43,7 +43,12 @@
             var table = $('#orders_table').DataTable(
                 {
                     'serverSide': true,
-                    'ajax': '/api/orderstatus/?format=datatables&username={{request.user}}&sku={{request.path|urlencode}}',
+                    'ajax': '/api/orderstatus/?format=json&username={{request.user}}&sku={{request.path|urlencode}}',
+                    'columnDefs':
+                    [
+                         { targets: [1,5,6], orderable: false},
+                         { targets: [1,2,3,4,5,6], searchable: false},
+                    ],
 
                     "columns": [
                         {"data": "order.order_id"},

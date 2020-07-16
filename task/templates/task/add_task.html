@@ -41,9 +41,13 @@
         $(document).ready(function () {
 
             $('#tasks_table').DataTable({
-                "order": [[0, "desc"]],
                 'serverSide': true,
-                'ajax': '/api/tasks/?format=datatables&username={{ request.user }}',
+                'ajax': '/api/tasks/?format=json&username={{ request.user }}',
+                'columnDefs':
+                    [
+                         { targets: [1,2,3,4], orderable: false},
+                         { targets: [1,2,3,4], searchable: false},
+                    ],
 
                 'columns': [
                     {'data': 'pk'},
