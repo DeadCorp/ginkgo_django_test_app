@@ -81,10 +81,12 @@ WSGI_APPLICATION = 'final.wsgi.application'
 
 DATABASES = {
     'default': {
+
         'ENGINE': 'django.db.backends.mysql',
-        'OPTIONS': {
-            'read_default_file': os.path.join(BASE_DIR, 'deploy/mysql.conf')
-        }
+        'NAME': 'final',
+        'USER': 'final',
+        'PASSWORD': 'Final123456789',
+
     }
 }
 
