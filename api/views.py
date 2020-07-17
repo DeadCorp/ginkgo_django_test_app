@@ -43,7 +43,6 @@ class SupplierAccountsViewSet(viewsets.ModelViewSet):
 class OrderViewSet(viewsets.ModelViewSet):
     serializer_class = OrderSerializer
 
-
     def get_queryset(self):
         queryset = Order.objects.all()
         username = self.request.query_params.get('username', None)
@@ -76,8 +75,8 @@ class GroupViewSet(viewsets.ModelViewSet):
 class StatusViewSet(viewsets.ModelViewSet):
     serializer_class = StatusSerializer
 
-    search_fields = ['order_id', ]
-    ordering_fields = ['order_id', 'account.username', 'account.email', 'price']
+    search_fields = ['order__order_id', ]
+    ordering_fields = ['order__order_id', 'order__account__username', 'order__account__email', 'order__price']
 
     def get_queryset(self):
         queryset = OrderStatus.objects.all()
