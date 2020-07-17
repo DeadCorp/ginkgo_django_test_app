@@ -24,7 +24,12 @@
 
                 'serverSide': true,
 
-                'ajax': '/api/supplier_accounts/?format=json',
+                'ajax': {
+                    "url": '/api/supplier_accounts/?format=json',
+                    "headers": {
+                            "Authorization": "Token {{ token }}",
+                        },
+                },
                 'columnDefs':
                     [
                          { targets: [3], orderable: false},

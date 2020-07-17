@@ -44,14 +44,17 @@
                 {
                     'serverSide': true,
                     'ajax': {
-                        'url': '/api/orderstatus/?format=json&username={{request.user}}&sku={{request.path|urlencode}}',
+                        'url': "/api/orderstatus/?format=json&username={{request.user}}&sku={{request.path|urlencode}}",
+                        "headers": {
+                            "Authorization": "Token {{ token }}",
+                        },
                         'dataSrc': 'data'
                     },
                     'columnDefs':
-                    [
-                         { targets: [1,5,6], orderable: false},
-                         { targets: [1,2,3,4,5,6], searchable: false},
-                    ],
+                        [
+                            {targets: [1, 5, 6], orderable: false},
+                            {targets: [1, 2, 3, 4, 5, 6], searchable: false},
+                        ],
 
                     "columns": [
                         {"data": "order.order_id"},

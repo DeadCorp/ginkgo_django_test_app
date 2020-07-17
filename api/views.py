@@ -2,7 +2,7 @@ import re
 
 from django.contrib.auth.models import User, Group
 from rest_framework import viewsets
-
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 
 from api.serializer import ProductSerializer, TaskSerializer, SupplierAccountsSerializer, OrderSerializer, \
     UserSerializer, GroupSerializer, StatusSerializer
@@ -14,12 +14,13 @@ from task.models import Task
 
 
 class ProductViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
     queryset = Product.objects.all().order_by('supplier')
     serializer_class = ProductSerializer
 
 
 class TaskViewSet(viewsets.ModelViewSet):
-
+    permission_classes = [IsAuthenticated]
     serializer_class = TaskSerializer
     search_fields = ['id']
     ordering_fields = ['pk']
@@ -34,6 +35,7 @@ class TaskViewSet(viewsets.ModelViewSet):
 
 
 class SupplierAccountsViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
     search_fields = ['username', 'email']
     ordering_fields = ['pk', 'supplier', 'username', 'email']
     queryset = SupplierAccount.objects.all().order_by('-supplier')
@@ -41,6 +43,7 @@ class SupplierAccountsViewSet(viewsets.ModelViewSet):
 
 
 class OrderViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
     serializer_class = OrderSerializer
 
     def get_queryset(self):
@@ -57,6 +60,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
 
 class UserViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAdminUser]
     """
     API endpoint that allows users to be viewed or edited.
     """
@@ -65,6 +69,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 class GroupViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAdminUser]
     """
     API endpoint that allows groups to be viewed or edited.
     """
@@ -74,7 +79,7 @@ class GroupViewSet(viewsets.ModelViewSet):
 
 class StatusViewSet(viewsets.ModelViewSet):
     serializer_class = StatusSerializer
-
+    permission_classes = [IsAuthenticated]
     search_fields = ['order__order_id', ]
     ordering_fields = ['order__order_id', 'order__account__username', 'order__account__email', 'order__price']
 

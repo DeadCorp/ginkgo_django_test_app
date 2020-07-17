@@ -42,7 +42,12 @@
 
             $('#tasks_table').DataTable({
                 'serverSide': true,
-                'ajax': '/api/tasks/?format=json&username={{ request.user }}',
+                'ajax': {
+                    "url": '/api/tasks/?format=json&username={{ request.user }}',
+                    "headers": {
+                            "Authorization": "Token {{ token }}",
+                        },
+                },
                 'columnDefs':
                     [
                          { targets: [1,2,3,4], orderable: false},
