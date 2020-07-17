@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'order',
     'django_cleanup.apps.CleanupConfig',
     'rest_framework',
-    'rest_framework.authtoken'
+    'rest_framework.authtoken',
     'api',
 
 ]
