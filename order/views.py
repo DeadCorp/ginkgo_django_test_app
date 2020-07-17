@@ -1,4 +1,5 @@
 import os
+import time
 
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, FileResponse
@@ -21,8 +22,10 @@ def add_to_cart(request):
         account = SupplierAccount.objects.get(id=request.POST['supplier_account_id'])
         order = Order(product=product, user_id=request.user.id, account=account)
         order.save()  # create order instance with current product user and supplier account
+        time.sleep(25)
         order_status = OrderStatus(order=order, status='IN_PROGRESS')  # set status in_progress for created order
         order_status.save()
+        time.sleep(25)
         parameters = {
             'count': count,
             'order_instance_id': order.id,
