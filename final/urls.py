@@ -19,6 +19,8 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns, static
 from django.urls import path, include
 
 from . import views, settings
+from api.urls import router
+from rest_framework.authtoken import views as views_token
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -27,10 +29,14 @@ urlpatterns = [
     path('accounts/register/', views.register, name='register'),
 
     path('', views.index, name='index'),
-    path('products/', include('product.urls')),
+    path('api/', include(router.urls)),
+    path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    path('api-token-auth/', views_token.obtain_auth_token),
+    path('products/', include('product.urls', 'api')),
     path('task/', include('task.urls')),
     path('supplier_account/', include('supplieraccount.urls')),
     path('order/', include('order.urls')),
+    path('order_tracking/', include('ordertraking.urls')),
 ]
 
 urlpatterns += staticfiles_urlpatterns()

@@ -1,3 +1,5 @@
+import time
+
 from final.celery import app
 
 from order.autoplacers import placer_walmart, placer_kmart, placer_samsclub

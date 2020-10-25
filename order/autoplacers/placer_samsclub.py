@@ -30,7 +30,7 @@ class AutoPlacerSamsClub(Browser):
         self.email = account.email
         self.password = account.password
 
-        self.product_url = order.product.url
+        self.product_url = order.product.product_url
         self.options = order.product.variants_tag
         self.is_variant = order.product.is_variant
         self.count = kwargs['count']

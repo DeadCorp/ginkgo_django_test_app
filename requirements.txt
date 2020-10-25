@@ -11,6 +11,9 @@ beautifulsoup4==4.9.1
 uWSGI==2.0.19.1
 mysqlclient==1.4.6
 openpyxl==3.0.4
+djangorestframework==3.11.0
+djangorestframework-datatables==0.5.2
+
 
 
 

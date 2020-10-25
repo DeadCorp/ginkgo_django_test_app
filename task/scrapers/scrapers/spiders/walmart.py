@@ -66,7 +66,7 @@ class WalmartSpider(scrapy.Spider):
             item['rating'] = response.css("div.ReviewsRating-container div[aria-hidden='true'] *::text").getall()
             item['delivery_price'] = ''.join(response.css("div.prod-fulfillment-messaging-text *::text").getall())
             item['product_id'] = product_id
-            item['url'] = response.url
+            item['product_url'] = response.url
             item['available'] = availability
             item['available_count'] = availability_count
             self.parsed_count += 1

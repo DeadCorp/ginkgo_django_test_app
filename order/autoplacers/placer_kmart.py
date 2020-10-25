@@ -22,7 +22,7 @@ class AutoPlacerKmart(Browser):
         order = Order.objects.get(id=kwargs['order_instance_id'])
         account = SupplierAccount.objects.get(id=order.account.id)
 
-        self.product_url = order.product.url
+        self.product_url = order.product.product_url
         self.options = order.product.variants_tag
         self.parse_options()
         self.count = kwargs['count']
@@ -235,6 +235,7 @@ class AutoPlacerKmart(Browser):
     def recognize_options_method(self):
         try:
             self.log_info('Start recognize variants display method')
+
             animate = self.browser.find_element(By.CSS_SELECTOR, '.variants-form > .a-imateStyle')
             try:
                 hidden_attr = self.browser.find_elements(By.CSS_SELECTOR, '.addTablestyle > div')

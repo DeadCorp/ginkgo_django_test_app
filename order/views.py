@@ -1,9 +1,11 @@
 import os
+import time
 
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, FileResponse
 from django.shortcuts import render, redirect
 from django.views import generic
+
 
 from order.models import Order, OrderStatus
 from order.tasks import add_to_cart_walmart, add_to_cart_kmart, add_to_cart_samsclub
@@ -16,7 +18,6 @@ from task.generate_report import ReportData, ReportFile
 def add_to_cart(request):
     if request.method == 'POST':
         count = request.POST['product_count']
-
         product = Product.objects.get(sku=request.POST['sku'])
         account = SupplierAccount.objects.get(id=request.POST['supplier_account_id'])
         order = Order(product=product, user_id=request.user.id, account=account)
@@ -44,8 +45,14 @@ def add_to_cart(request):
 
 @login_required()
 def display_my_orders(request, product_sku):
-    my_orders = Order.objects.filter(user=request.user, product__sku=product_sku).order_by('-pk')
-    return render(request, 'order/my_orders.html', {'my_orders': my_orders})
+    # my_orders = Order.objects.filter(user=request.user, product__sku=product_sku).order_by('-pk')
+
+    return render(request, 'order/my_orders.html')
+
+
+@login_required()
+def display_all_orders(request):
+    return render(request, 'order/all_orders.html')
 
 
 class StatusImageView(generic.DetailView):

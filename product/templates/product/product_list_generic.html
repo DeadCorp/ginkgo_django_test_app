@@ -54,7 +54,7 @@
                 {% endif %}
                 {% if product.model != '' and product.model != 'is unknown' %} <p><b>Model : </b>{{ product.model }}</p>
                 {% endif %}
-                <p><b>Url on shop : </b><a href="{{ product.url }}"> To shop </a></p>
+                <p><b>Url on shop : </b><a href="{{ product.product_url }}"> To shop </a></p>
 
                 <div class="accordion" id="description{{ forloop.counter }}">
                     <div class="card">

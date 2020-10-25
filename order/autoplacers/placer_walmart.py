@@ -27,11 +27,11 @@ class AutoPlacerWalmart(Browser):
         order = Order.objects.get(id=kwargs['order_instance_id'])
         account = SupplierAccount.objects.get(id=order.account.id)
 
-        self.main_page_url = order.product.url[:(order.product.url.index('/ip/'))]
+        self.main_page_url = order.product.product_url[:(order.product.product_url.index('/ip/'))]
         self.supplier_password = account.password
         self.supplier_email = account.email
         self.id_product = order.product.product_id
-        self.product_url = order.product.url
+        self.product_url = order.product.product_url
         self.count = kwargs['count']
         self.price = order.product.price.replace('$', '')
         self.qty = 0
