@@ -89,7 +89,6 @@ class StatusViewSet(viewsets.ModelViewSet):
         product_sku = self.request.query_params.get('sku', None)
         if product_sku is not None:
             sku = re.search(r'orders\/(.+)', product_sku)
-
             sku = sku.group(1) or None
         else:
             sku = None

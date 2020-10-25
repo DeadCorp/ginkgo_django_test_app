@@ -42,6 +42,7 @@
         {% endif %}
         {% if user.is_authenticated %}
             <a class="navbar-brand" href="{% url 'task:add_task' %}">Search products</a>
+            <a class="navbar-brand" href="{% url 'order:display_all_orders' %}">Orders</a>
             <a class="navbar-brand" href="{% url 'supplier_account:supplier_accounts' %}">Supplier accounts</a>
         {% endif %}
         <div class="collapse navbar-collapse" id="navbarSupportedContent">

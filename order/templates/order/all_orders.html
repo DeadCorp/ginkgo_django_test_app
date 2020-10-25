@@ -1,0 +1,62 @@
+{% extends 'base_generic.html' %}
+
+{% block title %}
+{% endblock %}
+
+{% block content %}
+<table id="all_orders_table">
+    <thead>
+    <tr>Order id</tr>
+    <tr>Product sku</tr>
+    <tr>Account name</tr>
+    <tr>Account email</tr>
+    <tr>Single price</tr>
+    <tr>Quantity</tr>
+    <tr>Order Status</tr>
+    </thead>
+
+    <tbody>
+
+    </tbody>
+</table>
+    <script>
+    $(document).ready(function () {
+        var table = $('#all_orders_table').DataTable(
+            {
+                'serverSide': true,
+                "ajax": {
+                    'url': '/api/orderstatus/?format=json&user={{ request.user }}',
+                    'headers': {
+                            "Authorization": "Token {{ token }}",
+                        },
+                    'dataSrc': 'data'
+                },
+                'columnDefs':
+                        [
+                            {targets: [1, 5, 6], orderable: false},
+                            {targets: [1, 2, 3, 4, 5, 6], searchable: false},
+                        ],
+                'columns': [
+                    {'data': 'order.order_id'},
+                    {'data': 'order.product'},
+                    {'data': 'order.account.username'},
+                    {'data': 'order.account.email'},
+                    {'data': 'order.price'},
+                    {'data': 'order.quantity'},
+                    {
+                        "data": null,
+                        "render": function (data, type, row, meta) {
+                            document.querySelector("#report_product_sku").setAttribute('value', data.order.product);
+                            let url_mask = "{% url 'order:order_status_image' pk=123 %}".replace(/123/, data.pk)
+                            return '<div class="alert"><a href="' + url_mask + '">' + data.status + '</a></div>';
+                        }
+                    },
+                ]
+
+            }
+        );
+
+    });
+    </script>
+
+{% endblock %}

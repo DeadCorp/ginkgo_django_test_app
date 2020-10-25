@@ -6,7 +6,6 @@ from django.http import HttpResponseRedirect, FileResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 
-from supplieraccount.models import SupplierCodes
 from task.forms import TaskForm
 from task.generate_report import ReportData, ReportFile
 from task.models import Task
@@ -27,19 +26,8 @@ def add_task(request):
         if form.is_valid():
             form.save()
         return redirect('task:add_task')
-    # else:
-    #     form = TaskForm()
-    #     tasks = Task.objects.filter(user_id=request.user).order_by('-id')
-    # if request.META.get('task_error_id'):
-    #     wrong = {
-    #         'task_error_id': request.META.get('task_error_id'),
-    #         'error': '\n'.join(request.META.get('error')),
-    #     }
-    # else:
-    #     wrong = ''
-    # suppliers = SupplierCodes.SUPPLIERS
     form = TaskForm()
-    return render(request, 'task/add_task.html', {'form': form})  # , 'tasks': tasks, 'suppliers': suppliers, 'wrong': wrong})
+    return render(request, 'task/add_task.html', {'form': form})
 
 
 @login_required()

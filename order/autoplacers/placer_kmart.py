@@ -172,7 +172,7 @@ class AutoPlacerKmart(Browser):
             self.wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '#rightrail')))
             quantity = self.wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'input[name="quantity"]')))
         except TimeoutException:
-             quantity = self.wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'input[name="quantity"]')))
+            quantity = self.wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'input[name="quantity"]')))
         quantity_value = quantity.get_attribute('value')
         difference = int(self.count) - int(quantity_value)
 
@@ -235,6 +235,7 @@ class AutoPlacerKmart(Browser):
     def recognize_options_method(self):
         try:
             self.log_info('Start recognize variants display method')
+
             animate = self.browser.find_element(By.CSS_SELECTOR, '.variants-form > .a-imateStyle')
             try:
                 hidden_attr = self.browser.find_elements(By.CSS_SELECTOR, '.addTablestyle > div')
