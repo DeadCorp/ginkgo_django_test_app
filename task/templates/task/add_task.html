@@ -2,8 +2,9 @@
 
 {% block title %} Add Task {% endblock %}
 
+
 {% block content %}
-    <form action="{% url 'task:add_task' %}" method="post" class="form-group">
+     <form action="{% url 'task:add_task' %}" method="post" class="form-group">
         {% csrf_token %}
         <input type="hidden" name="user_id" value="{{ request.user.id }}">
         <label for="sku">
@@ -24,24 +25,57 @@
     {% endif %}
     <div class="row">
         {% for task in tasks %}
-        <div class="col-sm-12">
-            <div class="card border border-success" style="margin: 0 -10px 10px -10px ; padding: 2% ">
+            <div class="col-sm-12">
+                <div class="card border border-success" style="margin: 0 -10px 10px -10px ; padding: 2% ">
 
-                <span><b>Task id :</b> {{ task.id }}</span>
-                {% if task.description != '' %}<span><b>    {{ task.description }}</b></span>{% endif %}
-                <span><b>Products SKU : </b>{{ task.data }}</span>
-                <form method="POST">
-                    {% csrf_token %}
-                    <input type="hidden" name="task_id" value={{ task.id }}>
-                    {% if task.description == 'In progress...' %}
-                        <button class="btn btn-danger" formaction="{% url 'task:delete_task' %}" type="submit" disabled>Delete
-                        </button>
-                    {% else %}
-                        <button class="btn btn-danger" formaction="{% url 'task:delete_task' %}" type="submit">Delete</button>
-                    {% endif %}
-                </form>
+                    <a name="{{ task.id }}"><b>Task id :</b> {{ task.id }}</a>
+                    {% if task.description != '' %}<span><b>    {{ task.description }}</b></span>{% endif %}
+                    <span><b>Products SKU : </b>{{ task.data }}</span>
+                    <form method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="task_id" value={{ task.id }}>
+                        {% if task.description == 'In progress...' %}
+                            <button class="btn btn-danger" formaction="{% url 'task:delete_task' %}" type="submit"
+                                    disabled>Delete
+                            </button>
+                        {% else %}
+                            <button class="btn btn-info" formaction="{% url 'task:retry_task' task.id %}" type="submit">
+                                Retry task
+                            </button>
+                            <button class="btn btn-danger" formaction="{% url 'task:delete_task' %}" type="submit">
+                                Delete
+                            </button>
+                            <button class="btn btn-outline-primary float-right"
+                                    style="margin: 0 10px 0 10px;"
+                                    formaction="{% url 'task:task_gen_csv' task.id %}"
+                                    type="submit">Generate csv file
+                            </button>
+                            <button class="btn btn-outline-primary float-right"
+                                    formaction="{% url 'task:task_gen_xls' task.id %}"
+                                    type="submit">Generate xls file
+                            </button>
+
+                                {% if wrong %}
+
+                                    {%  if wrong.task_error_id == task.id %}
+
+                                    <script type='text/javascript'>
+                                    $(document).ready(function(){
+                                    window.location = '#{{ task.id }}'
+                                    });
+                                    </script>
+
+                                         <div class="border-top" style="margin: 15px 0 0 0">
+                                         <h5 style="color: crimson">{{ wrong.error|linebreaks }}</h5>
+                                         </div>
+                                    {% endif %}
+                                {% endif %}
+
+                        {% endif %}
+
+                    </form>
+                </div>
             </div>
-        </div>
         {% endfor %}
     </div>
 {% endblock %}

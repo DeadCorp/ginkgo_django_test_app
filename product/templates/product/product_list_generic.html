@@ -30,7 +30,7 @@
                             {% if product.delivery_price != 'No delivery' %}
                                 {% if not product.delivery and not product.shipping %}
                                     <input type="submit" value="Add to Cart" class="btn btn-primary btn-sm" disabled>
-                                     <a class="btn btn-sm btn-info " style="margin: 0px 50px 0px 0px" href="{% url "order:display_my_orders" product %}">Product orders</a>
+                                     <a class="btn btn-sm btn-info " style="margin: 0px 50px 0px 0px" href="{% url "order:display_my_orders" product.sku %}">Product orders</a>
                                     <br><br>
                                     <div class="alert alert-danger">No delivery</div>
                                 {% else %}

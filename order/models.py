@@ -21,9 +21,9 @@ class Order(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name='Product')
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name='User')
     account = models.ForeignKey(SupplierAccount, on_delete=models.CASCADE, verbose_name='Supplier account')
-    order_id = models.CharField(max_length=100, verbose_name='Order id', default='', blank=True)
+    order_id = models.TextField(verbose_name='Order id', default='', blank=True)
     quantity = models.CharField(max_length=10, verbose_name='Order quantity', default='', blank=True)
-    price = models.CharField(max_length=10, verbose_name='Order price', default='', blank=True)
+    price = models.CharField(max_length=25, verbose_name='Order price', default='', blank=True)
 
     def __str__(self):
         return f'Order for product: {self.product}, user: {self.user}'
@@ -40,8 +40,8 @@ class OrderStatus(models.Model):
 
 class OrderStatusImage(models.Model):
     order_status = models.ForeignKey(OrderStatus, on_delete=models.CASCADE, verbose_name='Order status', default=None)
-    status_image = models.ImageField(upload_to='status_image', null=True, blank=True)
-    tag = models.CharField(max_length=100, verbose_name='Tag', default='', blank=True)
+    status_image = models.ImageField(upload_to='status_image', max_length=300, null=True, blank=True)
+    tag = models.TextField(verbose_name='Tag', default='', blank=True)
 
     def __str__(self):
         return f'Image {self.tag} for  {self.order_status}'

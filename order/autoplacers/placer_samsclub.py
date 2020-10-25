@@ -8,6 +8,7 @@ from selenium.common.exceptions import TimeoutException, ElementClickIntercepted
     ElementNotInteractableException
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 
 from order.autoplacers.Browser import Browser
@@ -37,8 +38,8 @@ class AutoPlacerSamsClub(Browser):
         self.product_id = order.product.product_id
         self.option_id = order.product.option_id
 
-        self.product_status = ''
-        self.cart_status = ''
+        self.product_status = '0'
+        self.cart_status = '0'
         self.task_id = kwargs['celery_task_id']
         self.log_info = lambda msg: logging.info(f'Order {self.task_id} {msg}')
         self.log_err = lambda msg: logging.error(f'Order {self.task_id} {msg}')
@@ -270,17 +271,20 @@ class AutoPlacerSamsClub(Browser):
         for item in header:
             if 'item' in item.text.lower():
                 item_number = re.findall(r'\d+', item.text)
-                if int(item_number[0]) == int(self.option_id):
-                    self.log_info('Product on the page is correct')
-                    return self.product_status
-                else:
-                    self.log_err('Product on the page is incorrect')
-                    self.product_status = 'ADDING_PROBLEM'
-                    return None
+                if item_number:
+                    if int(item_number[0]) == int(self.option_id):
+                        self.log_info('Product on the page is correct')
+                        return self.product_status
+                    else:
+                        self.log_err('Product on the page is incorrect')
+                        self.product_status = 'ADDING_PROBLEM'
+                        return None
 
     def enter_quantity(self):
         self.log_info(f'Start enter quantity. Need set quantity to {self.count}')
         try:
+            self.wait.until(EC.visibility_of_element_located(
+                (By.CSS_SELECTOR, '.online.sc-cart-qty-button * input'))).send_keys(Keys.DELETE)
             self.wait.until(EC.visibility_of_element_located(
                 (By.CSS_SELECTOR, '.online.sc-cart-qty-button * input'))).send_keys(self.count)
             try:

@@ -18,7 +18,7 @@ BOT_NAME = 'scrapers'
 SPIDER_MODULES = ['scrapers.spiders']
 NEWSPIDER_MODULE = 'scrapers.spiders'
 
-DJANGO_PROJECT_PATH = str(Path(__file__).parent.parent.parent)
+DJANGO_PROJECT_PATH = str(Path(__file__).parent.parent.parent.parent)
 DJANGO_SETTINGS_MODULE = 'final.settings'
 sys.path.insert(0, DJANGO_PROJECT_PATH)
 os.environ['DJANGO_SETTINGS_MODULE'] = DJANGO_SETTINGS_MODULE

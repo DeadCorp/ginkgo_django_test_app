@@ -96,7 +96,7 @@ class WalmartSpider(scrapy.Spider):
         task_time_text = task[0].description
 
         if task_time_text != 'In progress...':
-            numbers_from_task = spider.take_num(task_time_text)
+            numbers_from_task = re.findall(r'\d*\.\d+|\d+', task_time_text)
             time_from_task = numbers_from_task[0]
             parsed_count = numbers_from_task[1]
             count_to_parse = numbers_from_task[2]

@@ -40,12 +40,12 @@ class AutoPlacerKmart(Browser):
         self.screenshot_dict = {}
 
         self.animate_style = None
-        self.product_cart_price = ''
-        self.product_cart_quantity = ''
+        self.product_cart_price = '0'
+        self.product_cart_quantity = '0'
 
     def parse_options(self):
         if self.options and self.options != 'is unknown':
-            self.options = {item.split(':')[0].strip(): item.split(':')[1].strip() for item in self.options.split('/')}
+            self.options = {item.split(':')[0].strip(): item.split(':')[1].strip() for item in self.options.split(';')}
 
     def open_cart_page(self):
         self.log_info('Open cart page')
@@ -234,9 +234,11 @@ class AutoPlacerKmart(Browser):
 
     def recognize_options_method(self):
         try:
+            self.log_info('Start recognize variants display method')
             animate = self.browser.find_element(By.CSS_SELECTOR, '.variants-form > .a-imateStyle')
             try:
                 hidden_attr = self.browser.find_elements(By.CSS_SELECTOR, '.addTablestyle > div')
+                self.log_info('Found variants right of image')
                 if len(hidden_attr) == 0:
                     self.log_info('Need click on select button to display all options')
                     select_button = self.browser.find_element(By.CSS_SELECTOR, '.productVariant-module > .selectCotainer > a')
@@ -247,8 +249,10 @@ class AutoPlacerKmart(Browser):
                     self.animate_style = True
             except NoSuchElementException:
                 self.log_err('Not found animateStyle section')
+                self.log_info('Variants under image')
                 self.animate_style = False
         except NoSuchElementException:
+            self.log_info('Variants under image')
             self.animate_style = False
 
     def check_product_in_cart(self):

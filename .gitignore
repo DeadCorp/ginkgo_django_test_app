@@ -2,3 +2,4 @@ venv
 *.rdb
 media
 .idea
+static

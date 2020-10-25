@@ -10,7 +10,7 @@ class ProductListView(generic.ListView):
     paginate_by = 5
 
     def get_queryset(self):
-        return ordering(Product.objects.all())
+        return Product.objects.all().order_by('delivery_price')
 
 
 class ProductDetailView(generic.DetailView):
@@ -19,13 +19,13 @@ class ProductDetailView(generic.DetailView):
     context_object_name = 'product'
 
 
-def ordering(sets):
-    # First will be display availability products with delivery
-    # Next will be display products without delivery or not availability products
-    # In the end will be display not found products
-    sets1 = sets.exclude(name='not found')
-    sets2 = sets1.filter(delivery_price='No delivery')
-    sets3 = sets.filter(name='not found')
-    sets_last = sets1.union(sets2)
-    sets_last = sets_last.union(sets3).order_by('delivery_price', 'name')
-    return sets_last
+# def ordering(sets):
+#     # First will be display availability products with delivery
+#     # Next will be display products without delivery or not availability products
+#     # In the end will be display not found products
+#     sets1 = sets.exclude(name='not found')
+#     sets2 = sets1.filter(delivery_price='No delivery')
+#     sets3 = sets.filter(name='not found')
+#     sets_last = sets1.union(sets2)
+#     sets_last = sets_last.union(sets3).order_by('delivery_price', 'name')
+#     return sets_last

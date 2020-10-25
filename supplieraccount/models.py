@@ -17,9 +17,9 @@ class SupplierCodes(object):
 class SupplierAccount(models.Model):
     supplier = models.CharField(max_length=25, verbose_name='Supplier',
                                 choices=SupplierCodes.suppliers_dict_to_choices_tuple(SupplierCodes()), default='')
-    username = models.CharField(max_length=30, verbose_name='Username', default='', blank=True)
-    email = models.EmailField(max_length=30, verbose_name='Email', default='')
-    password = models.CharField(max_length=30, verbose_name='Password', default='')
+    username = models.TextField(verbose_name='Username', default='', blank=True)
+    email = models.EmailField(verbose_name='Email', default='')
+    password = models.TextField(verbose_name='Password', default='')
 
     def save(self):
         # if for supplier exist account with this email, notify user about it

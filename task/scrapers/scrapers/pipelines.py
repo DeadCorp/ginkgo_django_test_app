@@ -18,7 +18,7 @@ class WalmartProductPipeline(object):
     in_stoke_only = 'in-store purchase only'
     no_available_delivery = 'Delivery not available'
     no_delivery = 'No delivery'
-    default_delivery = '$5.99'
+    default_delivery = '5.99'
 
     def process_item(self, item, spider):
         item['delivery'] = True
@@ -27,7 +27,7 @@ class WalmartProductPipeline(object):
 
         if item['name'] != 'not found' and item['price'] != 'is unknown':
             price_for_delivery = item['price']
-            item['price'] = '$' + item['price']
+            item['price'] = item['price']
 
             if item['available'] != 'Out of stock':
                 if (self.in_stoke_only not in item['delivery_price']) and (
@@ -121,10 +121,10 @@ class SamsClubProductPipeline(object):
                 category = [category.text for category in categories]
                 item['category'] = ' / '.join(category)
 
-        item['available'] = 'Availability' if item.get('available') in ['inStoke', 'inStock', 'lowInStock'] else 'Out of stock'
+        item['available'] = 'In availability' if item.get('available') in ['inStoke', 'inStock', 'lowInStock'] else 'Out of stock'
         if not item.get('shipping'):
-            item['shipping'] = True if item['available'] == 'Availability' else False
-        item['delivery_price'] = 'Free delivery' if item.get('delivery_price') == 0 else item.get('delivery_price')
+            item['shipping'] = True if item['available'] == 'In availability' else False
+        item['delivery_price'] = 'Free delivery' if item.get('delivery_price') == 0 else str(item.get('delivery_price'))
 
         item.save()
         return item
